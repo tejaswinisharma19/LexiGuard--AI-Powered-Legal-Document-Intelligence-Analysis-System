@@ -1,0 +1,166 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Documents{% endblock %}
+
+{% block header_eyebrow %}DOCUMENT REPOSITORY{% endblock %}
+{% block header_title %}Stored Documents{% endblock %}
+
+{% block header_actions %}
+<span class="badge badge-info" id="docsCountBadge" style="font-size: 12px; padding: 6px 12px;">
+    Loading...
+</span>
+{% endblock %}
+
+{% block content %}
+<section class="admin-page-header">
+    <div class="admin-header-text">
+        <h2>Document Repository Directory</h2>
+        <p>Administrative index of all legal agreements, contracts, and briefs stored on the platform.</p>
+    </div>
+</section>
+
+<section class="admin-table-card">
+    <div class="admin-table-card-header">
+        <div class="header-info">
+            <h3>Uploaded Legal Documents</h3>
+            <p>Metadata records of agreements available for AI extraction, grounded Q&A, and comparison</p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <input type="text"
+                   id="docSearchInput"
+                   class="admin-search-input"
+                   placeholder="Search by filename or owner..."
+                   autocomplete="off">
+        </div>
+    </div>
+
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Document Name</th>
+                    <th>Owner / Account</th>
+                    <th style="width: 180px;">Upload Date</th>
+                    <th style="width: 140px;">Storage Status</th>
+                </tr>
+            </thead>
+            <tbody id="docsTableBody">
+                <tr>
+                    <td colspan="4" class="admin-table-state">
+                        <div class="admin-table-state-icon">▤</div>
+                        <div class="admin-table-state-title">Loading Document Records...</div>
+                        <p>Retrieving document repository catalog from the platform database.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let allDocuments = [];
+
+    async function loadDocuments() {
+        const tbody = document.getElementById('docsTableBody');
+        const badge = document.getElementById('docsCountBadge');
+
+        try {
+            const res = await fetch('/api/admin/documents');
+            if (!res.ok) throw new Error('Failed to load document directory.');
+            allDocuments = await res.json();
+
+            if (badge) {
+                badge.textContent = `${allDocuments.length.toLocaleString()} Documents`;
+            }
+
+            renderDocuments(allDocuments);
+        } catch (err) {
+            console.error('Error fetching documents:', err);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="admin-table-state">
+                        <div class="admin-table-state-icon" style="color: var(--danger);">⚠</div>
+                        <div class="admin-table-state-title" style="color: var(--danger);">Error Loading Documents</div>
+                        <p>Access forbidden or a server error occurred while retrieving document catalog.</p>
+                    </td>
+                </tr>
+            `;
+            if (badge) badge.textContent = 'Error';
+        }
+    }
+
+    function renderDocuments(docsToRender) {
+        const tbody = document.getElementById('docsTableBody');
+        tbody.innerHTML = '';
+
+        if (!docsToRender || docsToRender.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="admin-table-state">
+                        <div class="admin-table-state-icon">∅</div>
+                        <div class="admin-table-state-title">No Documents Found</div>
+                        <p>No document records matched your search query.</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        docsToRender.forEach(d => {
+            const tr = document.createElement('tr');
+            const uploadDate = d.created_at ? d.created_at.replace('T', ' ').substring(0, 19) : 'N/A';
+            const filename = d.filename || 'Untitled Document.pdf';
+            const owner = d.owner || 'System / Anonymous';
+
+            tr.innerHTML = `
+                <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 18px; color: var(--primary);">📄</span>
+                        <strong class="cell-strong" title="${escapeHtml(filename)}">${escapeHtml(filename)}</strong>
+                    </div>
+                </td>
+                <td>
+                    <span class="cell-subtle">${escapeHtml(owner)}</span>
+                </td>
+                <td>
+                    <span class="cell-timestamp">${uploadDate}</span>
+                </td>
+                <td>
+                    <span class="badge badge-success">● ${escapeHtml(d.status || 'Stored')}</span>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // Client-side search filtering
+    document.getElementById('docSearchInput').addEventListener('input', function (e) {
+        const query = e.target.value.trim().toLowerCase();
+        if (!query) {
+            renderDocuments(allDocuments);
+            return;
+        }
+        const filtered = allDocuments.filter(d => {
+            const name = (d.filename || '').toLowerCase();
+            const owner = (d.owner || '').toLowerCase();
+            return name.includes(query) || owner.includes(query);
+        });
+        renderDocuments(filtered);
+    });
+
+    document.addEventListener('DOMContentLoaded', loadDocuments);
+</script>
+{% endblock %}

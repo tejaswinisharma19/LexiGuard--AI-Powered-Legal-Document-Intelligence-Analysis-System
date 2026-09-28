@@ -1,0 +1,178 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Comparisons{% endblock %}
+
+{% block header_eyebrow %}COMPARISON AUDIT{% endblock %}
+{% block header_title %}Document Comparisons{% endblock %}
+
+{% block header_actions %}
+<span class="badge badge-info" id="compCountBadge" style="font-size: 12px; padding: 6px 12px;">
+    Loading...
+</span>
+{% endblock %}
+
+{% block content %}
+<section class="admin-page-header">
+    <div class="admin-header-text">
+        <h2>Document Comparison History</h2>
+        <p>Audit trail of all side-by-side legal agreement comparisons and differential analyses executed by users.</p>
+    </div>
+</section>
+
+<section class="admin-table-card">
+    <div class="admin-table-card-header">
+        <div class="header-info">
+            <h3>Comparison Records</h3>
+            <p>Chronological log of multi-document comparisons, clause discrepancies, and version differentials</p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <input type="text"
+                   id="compSearchInput"
+                   class="admin-search-input"
+                   placeholder="Search by document or user..."
+                   autocomplete="off">
+        </div>
+    </div>
+
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Base Agreement (Doc A)</th>
+                    <th>Compared Agreement (Doc B)</th>
+                    <th>User Account</th>
+                    <th style="width: 180px;">Timestamp</th>
+                    <th style="width: 130px;">Status</th>
+                </tr>
+            </thead>
+            <tbody id="comparisonsTableBody">
+                <tr>
+                    <td colspan="5" class="admin-table-state">
+                        <div class="admin-table-state-icon">⇄</div>
+                        <div class="admin-table-state-title">Loading Comparison Operations...</div>
+                        <p>Retrieving comparison records from the administrative database.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let allComparisons = [];
+
+    async function loadComparisons() {
+        const tbody = document.getElementById('comparisonsTableBody');
+        const badge = document.getElementById('compCountBadge');
+
+        try {
+            const res = await fetch('/api/admin/comparisons');
+            if (!res.ok) throw new Error('Failed to load comparison records.');
+            allComparisons = await res.json();
+
+            if (badge) {
+                badge.textContent = `${allComparisons.length.toLocaleString()} Comparisons`;
+            }
+
+            renderComparisons(allComparisons);
+        } catch (err) {
+            console.error('Error fetching comparisons:', err);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="admin-table-state">
+                        <div class="admin-table-state-icon" style="color: var(--danger);">⚠</div>
+                        <div class="admin-table-state-title" style="color: var(--danger);">Error Loading Comparisons</div>
+                        <p>Access forbidden or a server error occurred while retrieving comparison logs.</p>
+                    </td>
+                </tr>
+            `;
+            if (badge) badge.textContent = 'Error';
+        }
+    }
+
+    function renderComparisons(compsToRender) {
+        const tbody = document.getElementById('comparisonsTableBody');
+        tbody.innerHTML = '';
+
+        if (!compsToRender || compsToRender.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="admin-table-state">
+                        <div class="admin-table-state-icon">∅</div>
+                        <div class="admin-table-state-title">No Comparisons Found</div>
+                        <p>No document comparison operations matched your search query.</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        compsToRender.forEach(c => {
+            const tr = document.createElement('tr');
+            const timeStr = c.timestamp ? c.timestamp.replace('T', ' ').substring(0, 19) : 'N/A';
+            const docA = c.document_a || 'Document A';
+            const docB = c.document_b || 'Document B';
+
+            tr.innerHTML = `
+                <td>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="color: var(--primary);">📄</span>
+                        <strong class="cell-strong truncate-cell" title="${escapeHtml(docA)}">
+                            ${escapeHtml(docA)}
+                        </strong>
+                    </div>
+                </td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="color: var(--navy-dark);">📄</span>
+                        <strong class="cell-strong truncate-cell" title="${escapeHtml(docB)}">
+                            ${escapeHtml(docB)}
+                        </strong>
+                    </div>
+                </td>
+                <td>
+                    <span class="cell-subtle">${escapeHtml(c.user_id || 'System')}</span>
+                </td>
+                <td>
+                    <span class="cell-timestamp">${timeStr}</span>
+                </td>
+                <td>
+                    <span class="badge badge-secondary">⇄ ${escapeHtml(c.status || 'Completed')}</span>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // Client-side search filtering
+    document.getElementById('compSearchInput').addEventListener('input', function (e) {
+        const query = e.target.value.trim().toLowerCase();
+        if (!query) {
+            renderComparisons(allComparisons);
+            return;
+        }
+        const filtered = allComparisons.filter(c => {
+            const docA = (c.document_a || '').toLowerCase();
+            const docB = (c.document_b || '').toLowerCase();
+            const user = (c.user_id || '').toLowerCase();
+            return docA.includes(query) || docB.includes(query) || user.includes(query);
+        });
+        renderComparisons(filtered);
+    });
+
+    document.addEventListener('DOMContentLoaded', loadComparisons);
+</script>
+{% endblock %}

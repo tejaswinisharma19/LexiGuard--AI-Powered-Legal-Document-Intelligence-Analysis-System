@@ -1,0 +1,186 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Overview{% endblock %}
+
+{% block header_eyebrow %}SYSTEM ADMINISTRATION{% endblock %}
+{% block header_title %}Admin Overview{% endblock %}
+
+{% block header_actions %}
+<button type="button" class="btn btn-secondary btn-sm" onclick="loadOverviewStats()" id="refreshBtn" title="Refresh platform statistics">
+    <span>↻</span> Refresh
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Page Description Header Card -->
+<section class="admin-page-header">
+    <div class="admin-header-text">
+        <h2>Platform Operations & Metrics</h2>
+        <p>Real-time telemetry across users, document processing workloads, and AI operations.</p>
+    </div>
+</section>
+
+<!-- Key Platform Metrics Grid (Clean SaaS Cards) -->
+<section class="admin-stats-grid">
+    <div class="admin-stat-card">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Total Users</span>
+            <div class="admin-stat-icon">👥</div>
+        </div>
+        <strong class="admin-stat-value" id="statUsers">—</strong>
+        <span class="admin-stat-desc">Registered user accounts</span>
+    </div>
+
+    <div class="admin-stat-card">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Total Documents</span>
+            <div class="admin-stat-icon">▤</div>
+        </div>
+        <strong class="admin-stat-value" id="statDocs">—</strong>
+        <span class="admin-stat-desc">Uploaded legal agreements</span>
+    </div>
+
+    <div class="admin-stat-card">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Total Analyses</span>
+            <div class="admin-stat-icon">✦</div>
+        </div>
+        <strong class="admin-stat-value" id="statAnalyses">—</strong>
+        <span class="admin-stat-desc">AI analysis operations</span>
+    </div>
+
+    <div class="admin-stat-card">
+        <div class="admin-stat-top">
+            <span class="admin-stat-label">Total Comparisons</span>
+            <div class="admin-stat-icon">⇄</div>
+        </div>
+        <strong class="admin-stat-value" id="statComparisons">—</strong>
+        <span class="admin-stat-desc">Agreements compared</span>
+    </div>
+</section>
+
+<!-- Recent System Activity Stream -->
+<section class="admin-table-card">
+    <div class="admin-table-card-header">
+        <div class="header-info">
+            <h3>Recent System Activity</h3>
+            <p>Live stream of document processing, AI analyses, and comparison workloads</p>
+        </div>
+        <a href="/admin/activity" class="btn btn-outline btn-sm">
+            <span>View Full Stream</span>
+            <span>→</span>
+        </a>
+    </div>
+
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th style="width: 140px;">Activity</th>
+                    <th>Description</th>
+                    <th>User Account</th>
+                    <th style="width: 180px;">Timestamp</th>
+                </tr>
+            </thead>
+            <tbody id="overviewActivityBody">
+                <tr>
+                    <td colspan="4" class="admin-table-state">
+                        <div class="admin-table-state-icon">◷</div>
+                        <div class="admin-table-state-title">Loading system activity...</div>
+                        <p>Connecting to administrative telemetry endpoint.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    async function loadOverviewStats() {
+        const tbody = document.getElementById('overviewActivityBody');
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) refreshBtn.classList.add('loading');
+
+        try {
+            const res = await fetch('/api/admin/stats');
+            if (!res.ok) throw new Error('Failed to load administrative telemetry.');
+            const data = await res.json();
+
+            // Populate metric cards
+            document.getElementById('statUsers').textContent = (data.total_users ?? 0).toLocaleString();
+            document.getElementById('statDocs').textContent = (data.total_documents ?? 0).toLocaleString();
+            document.getElementById('statAnalyses').textContent = (data.total_analyses ?? 0).toLocaleString();
+            document.getElementById('statComparisons').textContent = (data.total_comparisons ?? 0).toLocaleString();
+
+            // Populate activity feed
+            tbody.innerHTML = '';
+            const activities = data.recent_activity || [];
+
+            if (activities.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="admin-table-state">
+                            <div class="admin-table-state-icon">∅</div>
+                            <div class="admin-table-state-title">No Recent Activity Recorded</div>
+                            <p>Operational events will appear here as users analyze and compare documents.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            activities.slice(0, 10).forEach(act => {
+                const tr = document.createElement('tr');
+                const isAnalysis = (act.type || '').toLowerCase() === 'analysis';
+                const badgeClass = isAnalysis ? 'badge-info' : 'badge-secondary';
+                const icon = isAnalysis ? '✦' : '⇄';
+                const label = (act.type || 'SYSTEM').toUpperCase();
+                const timeStr = act.timestamp ? act.timestamp.replace('T', ' ').substring(0, 19) : 'N/A';
+
+                tr.innerHTML = `
+                    <td>
+                        <span class="badge ${badgeClass}">${icon} ${label}</span>
+                    </td>
+                    <td>
+                        <span class="cell-strong">${escapeHtml(act.title || 'Platform Activity')}</span>
+                    </td>
+                    <td>
+                        <span class="cell-subtle">${escapeHtml(act.user_id || 'System')}</span>
+                    </td>
+                    <td>
+                        <span class="cell-timestamp">${timeStr}</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (err) {
+            console.error('Error fetching admin overview metrics:', err);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="admin-table-state">
+                        <div class="admin-table-state-icon" style="color: var(--danger);">⚠</div>
+                        <div class="admin-table-state-title" style="color: var(--danger);">Unable to Load Statistics</div>
+                        <p>Access forbidden or server error occurred while retrieving platform metrics.</p>
+                    </td>
+                </tr>
+            `;
+        } finally {
+            if (refreshBtn) refreshBtn.classList.remove('loading');
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    document.addEventListener('DOMContentLoaded', loadOverviewStats);
+</script>
+{% endblock %}

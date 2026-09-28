@@ -1,0 +1,185 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}System Activity{% endblock %}
+
+{% block header_eyebrow %}SYSTEM AUDIT{% endblock %}
+{% block header_title %}System Activity Stream{% endblock %}
+
+{% block header_actions %}
+<span class="badge badge-info" id="activityCountBadge" style="font-size: 12px; padding: 6px 12px;">
+    Loading...
+</span>
+{% endblock %}
+
+{% block content %}
+<section class="admin-page-header">
+    <div class="admin-header-text">
+        <h2>System Activity Stream</h2>
+        <p>Comprehensive audit log of multi-tenant workloads, AI operations, and document comparison events.</p>
+    </div>
+</section>
+
+<section class="admin-table-card">
+    <div class="admin-table-card-header">
+        <div class="header-info">
+            <h3>Audit Activity Stream</h3>
+            <p>Chronological platform events recorded for security, compliance, and operational visibility</p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <!-- Filter Buttons Bar -->
+            <div class="admin-filter-bar">
+                <button type="button" class="admin-filter-btn active" data-filter="all">All Operations</button>
+                <button type="button" class="admin-filter-btn" data-filter="analysis">AI Analyses</button>
+                <button type="button" class="admin-filter-btn" data-filter="comparison">Document Comparisons</button>
+            </div>
+
+            <input type="text"
+                   id="activitySearchInput"
+                   class="admin-search-input"
+                   placeholder="Filter activities..."
+                   autocomplete="off"
+                   style="width: 200px;">
+        </div>
+    </div>
+
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th style="width: 150px;">Operation</th>
+                    <th>Description / Resource</th>
+                    <th>User Account</th>
+                    <th style="width: 180px;">Timestamp</th>
+                </tr>
+            </thead>
+            <tbody id="activityStreamBody">
+                <tr>
+                    <td colspan="4" class="admin-table-state">
+                        <div class="admin-table-state-icon">◷</div>
+                        <div class="admin-table-state-title">Loading System Activity Log...</div>
+                        <p>Aggregating platform audit logs from the administrative stream.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let allActivities = [];
+    let activeFilter = 'all';
+
+    async function loadActivityStream() {
+        const tbody = document.getElementById('activityStreamBody');
+        const badge = document.getElementById('activityCountBadge');
+
+        try {
+            const res = await fetch('/api/admin/activity');
+            if (!res.ok) throw new Error('Failed to load system activity log.');
+            allActivities = await res.json();
+
+            if (badge) {
+                badge.textContent = `${allActivities.length.toLocaleString()} Events`;
+            }
+
+            renderActivities();
+        } catch (err) {
+            console.error('Error fetching activity log:', err);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="admin-table-state">
+                        <div class="admin-table-state-icon" style="color: var(--danger);">⚠</div>
+                        <div class="admin-table-state-title" style="color: var(--danger);">Error Loading Activity Stream</div>
+                        <p>Access forbidden or a server error occurred while retrieving system events.</p>
+                    </td>
+                </tr>
+            `;
+            if (badge) badge.textContent = 'Error';
+        }
+    }
+
+    function renderActivities() {
+        const tbody = document.getElementById('activityStreamBody');
+        tbody.innerHTML = '';
+
+        const searchQuery = (document.getElementById('activitySearchInput').value || '').trim().toLowerCase();
+
+        const filtered = allActivities.filter(a => {
+            const matchesFilter = (activeFilter === 'all') || ((a.type || '').toLowerCase() === activeFilter.toLowerCase());
+            if (!matchesFilter) return false;
+
+            if (!searchQuery) return true;
+            const title = (a.title || '').toLowerCase();
+            const user = (a.user_id || '').toLowerCase();
+            const type = (a.type || '').toLowerCase();
+            return title.includes(searchQuery) || user.includes(searchQuery) || type.includes(searchQuery);
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="admin-table-state">
+                        <div class="admin-table-state-icon">∅</div>
+                        <div class="admin-table-state-title">No Activities Found</div>
+                        <p>No system activity records matched the selected filter or search term.</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        filtered.forEach(act => {
+            const tr = document.createElement('tr');
+            const isAnalysis = (act.type || '').toLowerCase() === 'analysis';
+            const badgeClass = isAnalysis ? 'badge-info' : 'badge-secondary';
+            const icon = isAnalysis ? '✦' : '⇄';
+            const label = (act.type || 'SYSTEM').toUpperCase();
+            const timeStr = act.timestamp ? act.timestamp.replace('T', ' ').substring(0, 19) : 'N/A';
+
+            tr.innerHTML = `
+                <td>
+                    <span class="badge ${badgeClass}">${icon} ${label}</span>
+                </td>
+                <td>
+                    <strong class="cell-strong">${escapeHtml(act.title || 'Platform Activity')}</strong>
+                </td>
+                <td>
+                    <span class="cell-subtle">${escapeHtml(act.user_id || 'System')}</span>
+                </td>
+                <td>
+                    <span class="cell-timestamp">${timeStr}</span>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // Filter button handling
+    document.querySelectorAll('.admin-filter-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.admin-filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            activeFilter = this.dataset.filter;
+            renderActivities();
+        });
+    });
+
+    // Client-side search input handling
+    document.getElementById('activitySearchInput').addEventListener('input', renderActivities);
+
+    document.addEventListener('DOMContentLoaded', loadActivityStream);
+</script>
+{% endblock %}

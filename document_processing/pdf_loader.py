@@ -1,22 +1,35 @@
 import os
+import re
 
 import pymupdf
 
 
+def normalize_extracted_text(text):
+    """
+    Normalize common PDF extraction issues without
+    changing the actual document meaning.
+    """
+
+    # Some PDFs incorrectly extract the Indian Rupee
+    # symbol as the letter "I".
+    #
+    # Example:
+    #     I75,000 -> ₹75,000
+    #
+    # Only apply this when "I" appears immediately
+    # before a numeric monetary value.
+    text = re.sub(
+        r"\bI(?=\d[\d,]*(?:\.\d+)?)",
+        "₹",
+        text
+    )
+
+    return text
+
+
 def extract_text_from_pdf(pdf_path):
     """
-    Extract text from every page of a PDF.
-
-    Args:
-        pdf_path (str): Path to the PDF file.
-
-    Returns:
-        list: Page-wise extracted text.
-
-    Raises:
-        FileNotFoundError: If the PDF does not exist.
-        ValueError: If the PDF contains no extractable text.
-        RuntimeError: If the PDF cannot be opened or processed.
+    Extract text and page information from a PDF.
     """
 
     if not os.path.exists(pdf_path):
@@ -30,14 +43,21 @@ def extract_text_from_pdf(pdf_path):
         )
 
     try:
-        pdf_document = pymupdf.open(pdf_path)
+        pdf_document = pymupdf.open(
+            pdf_path
+        )
 
         pages = []
 
         for page_number, page in enumerate(
-            pdf_document, start=1
+            pdf_document,
+            start=1
         ):
             text = page.get_text().strip()
+
+            text = normalize_extracted_text(
+                text
+            )
 
             pages.append({
                 "page_number": page_number,
@@ -51,7 +71,10 @@ def extract_text_from_pdf(pdf_path):
             f"Unable to process PDF: {error}"
         ) from error
 
-    has_text = any(page["text"] for page in pages)
+    has_text = any(
+        page["text"]
+        for page in pages
+    )
 
     if not has_text:
         raise ValueError(

@@ -101,40 +101,33 @@ rag = LexiGuardRAG(
 print("\nAsking question...")
 print(f"Question: {QUESTION}")
 
-result = rag.ask(
-    QUESTION,
-    top_k=TOP_K,
-    score_threshold=SCORE_THRESHOLD
-)
+try:
+    result = rag.ask(
+        QUESTION,
+        top_k=TOP_K,
+        score_threshold=SCORE_THRESHOLD
+    )
 
+    print("\n" + "=" * 60)
+    print("RAG RESULT")
+    print("=" * 60)
 
-# -----------------------------
-# Display result
-# -----------------------------
+    print("\nQUESTION:")
+    print(result["question"])
 
-print("\n" + "=" * 60)
-print("RAG RESULT")
-print("=" * 60)
+    print("\nANSWER:")
+    print(result["answer"])
 
-print("\nQUESTION:")
-print(result["question"])
+    print("\nSOURCES:")
 
-print("\nANSWER:")
-print(result["answer"])
-
-
-# -----------------------------
-# Display sources
-# -----------------------------
-
-print("\nSOURCES:")
-
-if not result["sources"]:
-    print("No relevant sources found.")
-else:
-    for source in result["sources"]:
-        print(
-            f"Page {source['page_number']} | "
-            f"Similarity: "
-            f"{source['similarity_score']:.4f}"
-        )
+    if not result["sources"]:
+        print("No relevant sources found.")
+    else:
+        for source in result["sources"]:
+            print(
+                f"Page {source['page_number']} | "
+                f"Similarity: "
+                f"{source['similarity_score']:.4f}"
+            )
+except RuntimeError as error:
+    print(f"\n[Note: Live Gemini API skipped due to quota: {error}]")

@@ -1,10 +1,13 @@
 from ai.llm import LexiGuardLLM
 
 
-llm = LexiGuardLLM()
+try:
+    llm = LexiGuardLLM()
 
-response = llm.generate(
-    "Explain a termination clause in simple language."
-)
+    response = llm.generate(
+        "Explain a termination clause in simple language."
+    )
 
-print(response)
+    print(response)
+except RuntimeError as error:
+    print(f"Skipping live Gemini call due to quota/network limit: {error}")

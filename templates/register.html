@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LexiGuard | Create Account</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/legal_tech.css') }}"
+    >
+
+    <style>
+        :root {
+            --lg-primary: #1D4ED8;
+            --lg-primary-dark: #1E3A8A;
+
+            --lg-bg: #F8FAFC;
+            --lg-surface: #FFFFFF;
+
+            --lg-text: #0F172A;
+            --lg-secondary: #475569;
+            --lg-muted: #64748B;
+
+            --lg-border: #E2E8F0;
+
+            --lg-success: #15803D;
+            --lg-danger: #B91C1C;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            color: var(--lg-text);
+            background: var(--lg-bg);
+        }
+
+        body {
+            min-height: 100vh;
+        }
+
+        /* =========================================
+           MAIN AUTHENTICATION LAYOUT
+        ========================================= */
+
+        .auth-shell {
+            min-height: 100vh;
+
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1.15fr)
+                minmax(420px, 0.85fr);
+
+            background: var(--lg-bg);
+        }
+
+
+        /* =========================================
+           LEFT BRAND PANEL
+        ========================================= */
+
+        .brand-panel {
+            position: relative;
+
+            overflow: hidden;
+
+            padding: 52px 7vw 42px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+
+            color: #ffffff;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #071A35 0%,
+                    #0B2A55 58%,
+                    #1E3A8A 100%
+                );
+        }
+
+        .brand-panel::after {
+            content: "";
+
+            position: absolute;
+
+            width: 520px;
+            height: 520px;
+
+            right: -220px;
+            bottom: -220px;
+
+            border:
+                1px solid
+                rgba(147, 197, 253, 0.14);
+
+            border-radius: 50%;
+
+            box-shadow:
+                0 0 0 70px
+                rgba(147, 197, 253, 0.035),
+
+                0 0 0 140px
+                rgba(147, 197, 253, 0.025);
+        }
+
+
+        .brand-top,
+        .brand-content,
+        .brand-footer {
+            position: relative;
+            z-index: 1;
+        }
+
+
+        /* =========================================
+           BRAND HEADER
+        ========================================= */
+
+        .brand-top {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .brand-mark {
+            width: 46px;
+            height: 46px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 13px;
+
+            background:
+                rgba(255, 255, 255, 0.10);
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.15);
+
+            color: #ffffff;
+
+            font-size: 21px;
+            font-weight: 800;
+
+            box-shadow:
+                0 10px 28px
+                rgba(0, 0, 0, 0.16);
+        }
+
+        .brand-name {
+            font-size: 21px;
+            font-weight: 750;
+
+            letter-spacing: -0.3px;
+        }
+
+        .brand-subtitle {
+            margin-top: 3px;
+
+            color: #BFD0E8;
+
+            font-size: 10px;
+            font-weight: 700;
+
+            letter-spacing: 1.1px;
+
+            text-transform: uppercase;
+        }
+
+
+        /* =========================================
+           BRAND CONTENT
+        ========================================= */
+
+        .brand-content {
+            max-width: 590px;
+
+            margin: auto 0;
+
+            padding: 80px 0;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 8px 12px;
+
+            margin-bottom: 22px;
+
+            border:
+                1px solid
+                rgba(147, 197, 253, 0.22);
+
+            border-radius: 999px;
+
+            background:
+                rgba(59, 130, 246, 0.10);
+
+            color: #BFDBFE;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            letter-spacing: 0.65px;
+
+            text-transform: uppercase;
+        }
+
+        .eyebrow-dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: #60A5FA;
+
+            box-shadow:
+                0 0 0 4px
+                rgba(96, 165, 250, 0.12);
+        }
+
+        .brand-content h1 {
+            margin: 0 0 18px;
+
+            max-width: 570px;
+
+            font-size:
+                clamp(38px, 4vw, 58px);
+
+            line-height: 1.04;
+
+            letter-spacing: -2px;
+
+            font-weight: 780;
+        }
+
+        .brand-content p {
+            max-width: 540px;
+
+            margin: 0;
+
+            color: #C5D3E6;
+
+            font-size: 16px;
+
+            line-height: 1.7;
+        }
+
+
+        /* =========================================
+           FEATURES
+        ========================================= */
+
+        .feature-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 12px;
+
+            margin-top: 42px;
+        }
+
+        .feature {
+            padding: 16px;
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.09);
+
+            border-radius: 12px;
+
+            background:
+                rgba(255, 255, 255, 0.045);
+        }
+
+        .feature-icon {
+            width: 30px;
+            height: 30px;
+
+            display: grid;
+            place-items: center;
+
+            margin-bottom: 11px;
+
+            border-radius: 9px;
+
+            background:
+                rgba(59, 130, 246, 0.16);
+
+            color: #93C5FD;
+
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .feature strong {
+            display: block;
+
+            font-size: 12px;
+
+            line-height: 1.45;
+
+            color: #E7EEF8;
+        }
+
+
+        /* =========================================
+           BRAND FOOTER
+        ========================================= */
+
+        .brand-footer {
+            color: #91A7C2;
+
+            font-size: 11px;
+        }
+
+
+        /* =========================================
+           RIGHT FORM PANEL
+        ========================================= */
+
+        .form-panel {
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            padding:
+                48px
+                clamp(28px, 5vw, 72px);
+
+            background: var(--lg-surface);
+
+            border-left:
+                1px solid
+                var(--lg-border);
+        }
+
+        .form-wrap {
+            width: min(100%, 440px);
+        }
+
+
+        /* =========================================
+           FORM HEADER
+        ========================================= */
+
+        .form-kicker {
+            color: var(--lg-primary);
+
+            font-size: 12px;
+            font-weight: 750;
+
+            letter-spacing: 0.7px;
+
+            text-transform: uppercase;
+
+            margin-bottom: 11px;
+        }
+
+        .form-title {
+            margin: 0;
+
+            font-size: 32px;
+
+            line-height: 1.15;
+
+            letter-spacing: -0.8px;
+
+            color: var(--lg-text);
+        }
+
+        .form-subtitle {
+            margin: 10px 0 28px;
+
+            color: var(--lg-secondary);
+
+            font-size: 14px;
+
+            line-height: 1.6;
+        }
+
+
+        /* =========================================
+           ERROR
+        ========================================= */
+
+        .alert {
+            padding: 12px 14px;
+
+            margin-bottom: 20px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+        .alert-error {
+            color: var(--lg-danger);
+
+            background: #FEF2F2;
+
+            border:
+                1px solid
+                #FECACA;
+        }
+
+
+        /* =========================================
+           FORM GROUP
+        ========================================= */
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: var(--lg-text);
+
+            font-size: 13px;
+
+            font-weight: 650;
+        }
+
+
+        /* =========================================
+           INPUTS
+        ========================================= */
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+
+            min-height: 48px;
+
+            padding:
+                0
+                46px
+                0
+                14px;
+
+            border:
+                1px solid
+                var(--lg-border);
+
+            border-radius: 9px;
+
+            outline: none;
+
+            background: #ffffff;
+
+            color: var(--lg-text);
+
+            font-size: 14px;
+
+            transition:
+                border-color 0.18s,
+                box-shadow 0.18s;
+        }
+
+        .form-control::placeholder {
+            color: #94A3B8;
+        }
+
+        .form-control:hover {
+            border-color: #CBD5E1;
+        }
+
+        .form-control:focus {
+            border-color: var(--lg-primary);
+
+            box-shadow:
+                0 0 0 3px
+                rgba(29, 78, 216, 0.10);
+        }
+
+
+        /* =========================================
+           PASSWORD TOGGLE
+        ========================================= */
+
+        .toggle-password {
+            position: absolute;
+
+            right: 10px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            border: 0;
+
+            background: transparent;
+
+            color: var(--lg-muted);
+
+            cursor: pointer;
+
+            padding: 7px;
+
+            font-size: 12px;
+
+            font-weight: 650;
+        }
+
+        .toggle-password:hover {
+            color: var(--lg-primary);
+        }
+
+
+        /* =========================================
+           PASSWORD HINT
+        ========================================= */
+
+        .password-hint {
+            margin-top: 7px;
+
+            color: var(--lg-muted);
+
+            font-size: 11px;
+        }
+
+        .password-status {
+            min-height: 16px;
+
+            margin-top: 7px;
+
+            font-size: 11px;
+
+            font-weight: 600;
+        }
+
+        .password-status.valid {
+            color: var(--lg-success);
+        }
+
+        .password-status.invalid {
+            color: var(--lg-danger);
+        }
+
+
+        /* =========================================
+           BUTTON
+        ========================================= */
+
+        .submit-btn {
+            width: 100%;
+
+            min-height: 49px;
+
+            margin-top: 5px;
+
+            border: 0;
+
+            border-radius: 9px;
+
+            background:
+                var(--lg-primary);
+
+            color: #ffffff;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 5px 14px
+                rgba(29, 78, 216, 0.18);
+
+            transition:
+                background 0.18s,
+                transform 0.18s,
+                box-shadow 0.18s;
+        }
+
+        .submit-btn:hover {
+            background:
+                var(--lg-primary-dark);
+
+            transform:
+                translateY(-1px);
+
+            box-shadow:
+                0 8px 18px
+                rgba(29, 78, 216, 0.22);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+
+        /* =========================================
+           FOOTER
+        ========================================= */
+
+        .form-footer {
+            margin-top: 22px;
+
+            padding-top: 20px;
+
+            border-top:
+                1px solid
+                var(--lg-border);
+
+            text-align: center;
+
+            color: var(--lg-muted);
+
+            font-size: 13px;
+        }
+
+        .form-footer a {
+            color: var(--lg-primary);
+
+            font-weight: 700;
+
+            text-decoration: none;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+
+        /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+        @media (max-width: 960px) {
+
+            .auth-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .brand-panel {
+                display: none;
+            }
+
+            .form-panel {
+                min-height: 100vh;
+
+                border-left: 0;
+
+                padding: 32px 22px;
+            }
+        }
+
+        @media (max-width: 520px) {
+
+            .form-title {
+                font-size: 28px;
+            }
+
+            .form-panel {
+                padding: 28px 18px;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <main class="auth-shell">
+
+        <!-- =====================================
+             LEFT BRAND PANEL
+        ====================================== -->
+
+        <section class="brand-panel">
+
+            <div class="brand-top">
+
+                <div class="brand-mark">
+                    L
+                </div>
+
+                <div>
+                    <div class="brand-name">
+                        LexiGuard
+                    </div>
+
+                    <div class="brand-subtitle">
+                        Legal Document Intelligence
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="brand-content">
+
+                <div class="eyebrow">
+
+                    <span class="eyebrow-dot"></span>
+
+                    AI-powered legal intelligence
+
+                </div>
+
+
+                <h1>
+                    Build a smarter legal workspace.
+                </h1>
+
+
+                <p>
+                    Create your LexiGuard account to analyze, query,
+                    compare, and understand legal documents with
+                    grounded AI assistance.
+                </p>
+
+
+                <div class="feature-grid">
+
+                    <div class="feature">
+
+                        <div class="feature-icon">
+                            ✓
+                        </div>
+
+                        <strong>
+                            Secure account setup
+                        </strong>
+
+                    </div>
+
+
+                    <div class="feature">
+
+                        <div class="feature-icon">
+                            ⌁
+                        </div>
+
+                        <strong>
+                            Document intelligence
+                        </strong>
+
+                    </div>
+
+
+                    <div class="feature">
+
+                        <div class="feature-icon">
+                            AI
+                        </div>
+
+                        <strong>
+                            Grounded legal Q&amp;A
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="brand-footer">
+
+                &copy; LexiGuard AI Legal Intelligence Systems.
+                Confidential &amp; Secure.
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================
+             RIGHT FORM PANEL
+        ====================================== -->
+
+        <section class="form-panel">
+
+            <div class="form-wrap">
+
+                <div class="form-kicker">
+                    Get started
+                </div>
+
+
+                <h2 class="form-title">
+                    Create your account
+                </h2>
+
+
+                <p class="form-subtitle">
+                    Set up your LexiGuard credentials and start
+                    building your legal intelligence workspace.
+                </p>
+
+
+                {% if error %}
+
+                <div
+                    class="alert alert-error"
+                    id="authError"
+                >
+                    {{ error }}
+                </div>
+
+                {% endif %}
+
+
+                <form
+                    action="{{ url_for('register') }}"
+                    method="POST"
+                    id="registerForm"
+                >
+
+                    <!-- Full Name -->
+
+                    <div class="form-group">
+
+                        <label for="full_name">
+                            Full Name
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="full_name"
+                            name="full_name"
+                            placeholder="Enter your full name"
+                            autocomplete="name"
+                            required
+                            autofocus
+                        >
+
+                    </div>
+
+
+                    <!-- Email -->
+
+                    <div class="form-group">
+
+                        <label for="email">
+                            Email Address
+                        </label>
+
+                        <input
+                            type="email"
+                            class="form-control"
+                            id="email"
+                            name="email"
+                            placeholder="you@company.com"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Password -->
+
+                    <div class="form-group">
+
+                        <label for="password">
+                            Password
+                        </label>
+
+
+                        <div class="input-wrap">
+
+                            <input
+                                type="password"
+                                class="form-control"
+                                id="password"
+                                name="password"
+                                placeholder="Create a password"
+                                minlength="6"
+                                autocomplete="new-password"
+                                required
+                            >
+
+
+                            <button
+                                type="button"
+                                class="toggle-password"
+                                data-target="password"
+                            >
+                                Show
+                            </button>
+
+                        </div>
+
+
+                        <div class="password-hint">
+                            Use at least 6 characters.
+                        </div>
+
+                    </div>
+
+
+                    <!-- Confirm Password -->
+
+                    <div class="form-group">
+
+                        <label for="confirm_password">
+                            Confirm Password
+                        </label>
+
+
+                        <div class="input-wrap">
+
+                            <input
+                                type="password"
+                                class="form-control"
+                                id="confirm_password"
+                                name="confirm_password"
+                                placeholder="Re-enter your password"
+                                minlength="6"
+                                autocomplete="new-password"
+                                required
+                            >
+
+
+                            <button
+                                type="button"
+                                class="toggle-password"
+                                data-target="confirm_password"
+                            >
+                                Show
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            class="password-status"
+                            id="passwordStatus"
+                        ></div>
+
+                    </div>
+
+
+                    <!-- Submit -->
+
+                    <button
+                        type="submit"
+                        class="submit-btn"
+                        id="registerButton"
+                    >
+                        Create Account
+                    </button>
+
+                </form>
+
+
+                <!-- Login -->
+
+                <div class="form-footer">
+
+                    Already have an account?
+
+                    <a
+                        href="{{ url_for('login') }}"
+                        id="loginLink"
+                    >
+                        Sign In
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================================
+         FRONTEND PASSWORD INTERACTION
+    ========================================== -->
+
+    <script>
+
+        /*
+         * Password visibility
+         */
+
+        document
+            .querySelectorAll('.toggle-password')
+            .forEach(function (button) {
+
+                button.addEventListener('click', function () {
+
+                    const input =
+                        document.getElementById(
+                            button.dataset.target
+                        );
+
+                    if (!input) {
+                        return;
+                    }
+
+                    const isPassword =
+                        input.type === 'password';
+
+                    input.type =
+                        isPassword
+                            ? 'text'
+                            : 'password';
+
+                    button.textContent =
+                        isPassword
+                            ? 'Hide'
+                            : 'Show';
+
+                });
+
+            });
+
+
+        /*
+         * Password matching
+         */
+
+        const password =
+            document.getElementById('password');
+
+        const confirmPassword =
+            document.getElementById('confirm_password');
+
+        const passwordStatus =
+            document.getElementById('passwordStatus');
+
+
+        function validatePasswords() {
+
+            if (
+                !confirmPassword ||
+                !password ||
+                !passwordStatus
+            ) {
+                return;
+            }
+
+
+            if (!confirmPassword.value) {
+
+                passwordStatus.textContent = '';
+
+                passwordStatus.className =
+                    'password-status';
+
+                return;
+            }
+
+
+            if (
+                password.value ===
+                confirmPassword.value
+            ) {
+
+                passwordStatus.textContent =
+                    'Passwords match.';
+
+                passwordStatus.className =
+                    'password-status valid';
+
+            } else {
+
+                passwordStatus.textContent =
+                    'Passwords do not match.';
+
+                passwordStatus.className =
+                    'password-status invalid';
+
+            }
+
+        }
+
+
+        password?.addEventListener(
+            'input',
+            validatePasswords
+        );
+
+
+        confirmPassword?.addEventListener(
+            'input',
+            validatePasswords
+        );
+
+
+        /*
+         * Prevent submission if passwords differ.
+         */
+
+        document
+            .getElementById('registerForm')
+            ?.addEventListener(
+                'submit',
+                function (event) {
+
+                    if (
+                        password &&
+                        confirmPassword &&
+                        password.value !==
+                        confirmPassword.value
+                    ) {
+
+                        event.preventDefault();
+
+                        passwordStatus.textContent =
+                            'Passwords do not match.';
+
+                        passwordStatus.className =
+                            'password-status invalid';
+
+                        confirmPassword.focus();
+
+                    }
+
+                }
+            );
+
+    </script>
+
+</body>
+</html>

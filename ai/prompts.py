@@ -1,276 +1,378 @@
+# ai/prompts.py
+
+
 def build_qa_prompt(context, question):
     """
-    Build a prompt for answering questions about a legal document.
+    Build a grounded prompt for document question answering.
     """
 
-    prompt = f"""
-You are LexiGuard, an AI-assisted legal document
-analysis system.
+    return f"""
+You are LexiGuard, an AI-powered legal document
+analysis assistant.
 
-Answer the user's question using ONLY the provided
-document context.
+Answer the user's question using ONLY the information
+provided in the document context below.
 
-Rules:
+Do not use outside knowledge.
+Do not invent facts.
+Do not assume information that is not present.
 
-1. Do not invent or assume information.
-2. If the answer is not present in the provided context,
-   say exactly:
-   Not found in the document.
-3. Give a clear and concise answer.
-4. Mention the relevant section and page when available.
-5. Use cautious language when the document information
-   is incomplete.
-6. LexiGuard provides AI-assisted document analysis
-   and is not a substitute for professional legal advice.
+If the answer cannot be found in the provided document
+context, respond exactly with:
 
-DOCUMENT CONTEXT:
+"Not found in the document."
+
+When possible:
+- Mention the relevant page number.
+- Mention the relevant section or clause.
+- Keep the answer concise and factual.
+- Use cautious language when interpreting legal clauses.
+
+Respond in no more than 50 words.
+
+Do not provide a legal conclusion.
+Do not claim that a clause is legally valid or invalid.
+
+User Question:
+{question}
+
+========================
+DOCUMENT CONTEXT
+========================
 
 {context}
 
-USER QUESTION:
+========================
 
-{question}
-
-ANSWER:
+Important:
+This is AI-assisted document analysis and is not
+professional legal advice.
 """
-
-    return prompt
 
 
 def build_summary_prompt(context):
     """
-    Build a prompt for generating a structured legal
-    document summary.
+    Build a grounded prompt for legal document summarization.
     """
 
-    prompt = f"""
-You are LexiGuard, an AI-assisted legal document
-analysis system.
+    return f"""
+You are LexiGuard, an AI-powered legal document
+analysis assistant.
 
-Create a structured summary of the provided legal document.
+Create a factual summary of the legal document using
+ONLY the information provided in the document context.
 
-Use ONLY information explicitly present in the document.
+Do not use outside knowledge.
+Do not invent information.
+Do not assume missing information.
 
-Do not invent, assume, or infer missing information.
+Use the following fields:
 
-If a requested field is not present in the document,
-write exactly:
+1. Document Type
+2. Parties
+3. Effective Date
+4. Duration
+5. Payment Terms
+6. Termination
+7. Renewal
+8. Confidentiality
+9. Liability
+10. Jurisdiction
+11. Important Obligations
 
-Not found in the document.
+For every field:
 
-Include a relevant section and page reference whenever
-the information is available.
+- Use the information available in the document.
+- If the information is not present, write:
+  "Not found in the document."
 
-Summarize the following fields:
+Where possible, include page numbers or section
+references.
 
-1. DOCUMENT TYPE
-2. PARTIES
-3. EFFECTIVE DATE
-4. DURATION
-5. PAYMENT TERMS
-6. TERMINATION
-7. RENEWAL
-8. CONFIDENTIALITY
-9. LIABILITY
-10. JURISDICTION
-11. IMPORTANT OBLIGATIONS
+Keep the summary factual and concise. Respond in no more than 50 words.
 
-Keep the summary clear, concise, and easy to understand.
+Do not provide a legal conclusion.
+Do not state that the agreement is legally valid or invalid.
 
-DOCUMENT CONTEXT:
+At the end, include:
+
+Legal Analysis Disclaimer:
+This is AI-assisted document analysis and is not
+professional legal advice.
+
+========================
+DOCUMENT CONTEXT
+========================
 
 {context}
-
-Provide the structured summary now.
-
-Remember:
-LexiGuard provides AI-assisted document analysis and
-is not a substitute for professional legal advice.
 """
-
-    return prompt
 
 
 def build_clause_extraction_prompt(context):
     """
-    Build a prompt for extracting important legal clauses
-    from a document.
+    Build a grounded prompt for extracting important
+    legal clauses from a document.
     """
 
-    prompt = f"""
-You are LexiGuard, an AI-assisted legal document
-analysis system.
+    return f"""
+You are LexiGuard, an AI-powered legal document
+analysis assistant.
 
-Identify and extract important clauses from the provided
-legal document.
+Extract important legal clauses from the provided
+document context.
 
-Use ONLY information explicitly present in the document.
+Use ONLY the information contained in the document.
 
-Do not invent, assume, or infer information.
+Do not use outside knowledge.
+Do not invent clauses.
+Do not assume information that is not present.
 
-Analyze the following clause types:
+Look for the following clause categories:
 
-1. TERMINATION
-2. PAYMENT
-3. CONFIDENTIALITY
-4. LIABILITY
-5. INTELLECTUAL PROPERTY
-6. RENEWAL
-7. NON-COMPETE
-8. JURISDICTION
-9. DISPUTE RESOLUTION
-10. PENALTIES
+1. Termination
+2. Payment
+3. Confidentiality
+4. Liability
+5. Intellectual Property
+6. Renewal
+7. Non-compete
+8. Jurisdiction
+9. Dispute Resolution
+10. Penalties
 
-For each clause:
+For each category, provide:
 
-- Identify the clause type.
-- Provide a concise explanation.
-- Mention the relevant section.
-- Mention the page number.
-- Include the relevant clause information when useful.
+- Clause:
+- Explanation:
+- Source:
 
-If a clause type is not present in the document, write:
+If a category is not present, write:
 
-Not found in the document.
+"Not found in the document."
 
-Do not make legal validity judgments.
+Use the page number and section information provided
+in the document context whenever possible.
+
+Keep the extraction factual. Respond in no more than 50 words.
 
 Do not state that a clause is legally valid or invalid.
+Do not provide a legal conclusion.
 
-LexiGuard provides AI-assisted document analysis and
-is not a substitute for professional legal advice.
+Use cautious language such as:
 
-DOCUMENT CONTEXT:
+- "The document states..."
+- "The clause provides..."
+- "The document appears to require..."
+
+At the end, include:
+
+Legal Analysis Disclaimer:
+This is AI-assisted document analysis and is not
+professional legal advice.
+
+========================
+DOCUMENT CONTEXT
+========================
 
 {context}
-
-CLAUSE EXTRACTION RESULT:
 """
-
-    return prompt
 
 
 def build_risk_analysis_prompt(context):
     """
-    Build a prompt for identifying potential areas
-    requiring review in a legal document.
+    Build a grounded prompt for identifying potential
+    risks or clauses requiring review.
     """
 
-    prompt = f"""
+    return f"""
+You are LexiGuard, an AI-powered legal document
+analysis assistant.
+
+Analyze the provided legal document context and
+identify potential risks, concerns, or clauses that
+may require review.
+
+Use ONLY the information contained in the document.
+
+Do not use outside knowledge.
+Do not invent information.
+
+Look for potential risks across key areas:
+- termination
+- payment terms
+- automatic renewal
+- confidentiality
+- intellectual property
+- liability
+- data protection
+- dispute resolution
+- governing law
+- important obligations
+
+For each potential concern, provide:
+
+1. Risk / Concern
+2. Relevant Clause
+3. Explanation (why it may require review)
+4. Severity (Low, Medium, High)
+5. Source (page or section reference)
+
+Do not claim that a clause is legally invalid, enforceable, or unenforceable.
+Do not provide a definitive legal judgment.
+
+Use cautious wording such as:
+- "Potential risk"
+- "Potential concern"
+- "Clause requiring review"
+
+If no potential concern can be identified from the
+provided context, state:
+"No potential risks identified from the provided document context."
+
+Always provide page or section references when available.
+
+Respond in no more than 50 words.
+
+At the end, include:
+
+Legal Analysis Disclaimer:
+This is AI-assisted document analysis and is not a substitute for professional legal advice.
+
+========================
+DOCUMENT CONTEXT
+========================
+
+{context}
+"""
+
+
+def build_comparison_prompt(
+    document_a_context,
+    document_b_context
+):
+    """
+    Build a grounded prompt for comparing two legal documents.
+
+    The model must return structured JSON so the frontend
+    can reliably display the comparison.
+    """
+
+    return f"""
 You are LexiGuard, an AI-assisted legal document
 analysis system.
 
-Analyze the provided legal document and identify
-potential risks, concerns, or clauses requiring review.
+Your task is to compare Document A and Document B
+using ONLY the information provided in the contexts below.
 
-Use ONLY information explicitly present in the document.
+Do not use outside knowledge.
 
-Do not invent, assume, or infer information.
+Do not invent missing information.
 
-Do not provide definitive legal conclusions.
+If information is not available in a document,
+write exactly:
 
-Do not state that something is legally invalid,
-illegal, enforceable, or unenforceable.
+Not found in the document.
 
-Use cautious language such as:
+Compare the following categories:
 
-- Potential risk
-- Potential concern
-- Clause requiring review
-- May require attention
+1. Payment Terms
+2. Termination
+3. Duration
+4. Renewal
+5. Liability
+6. Confidentiality
+7. Obligations
 
-For each potential risk, provide:
+For every category, provide:
 
-1. RISK
-2. SEVERITY
-   - Low
-   - Medium
-   - High
-3. WHY IT MAY REQUIRE REVIEW
-4. SECTION
-5. PAGE
-6. RELEVANT CLAUSE
+- document_a
+- document_b
+- difference
+- source
 
-Every identified concern should be supported by
-information from the provided document.
+The "source" field should identify the relevant page
+and section/chunk when available.
 
-If no potential risks are identified from the provided
-context, write:
+If there is no meaningful difference between the
+documents, write:
 
-No potential risks identified from the provided document context.
+No material difference identified.
 
-LexiGuard provides AI-assisted document analysis and
-is not a substitute for professional legal advice.
+Do not describe either document as better, worse,
+safer, riskier, or more favorable.
 
-DOCUMENT CONTEXT:
+Keep the comparison factual and neutral.
 
-{context}
+IMPORTANT:
+Return ONLY valid JSON.
 
-RISK ANALYSIS RESULT:
-"""
+Do not include Markdown code fences.
 
-    return prompt
+Do not include explanatory text before or after the JSON.
 
+Use exactly this JSON structure:
 
-def build_comparison_prompt(document_a_context, document_b_context):
-    """
-    Build a prompt for comparing two legal documents.
-    """
+{{
+    "comparison": [
+        {{
+            "category": "Payment Terms",
+            "document_a": "...",
+            "document_b": "...",
+            "difference": "...",
+            "source": "..."
+        }},
+        {{
+            "category": "Termination",
+            "document_a": "...",
+            "document_b": "...",
+            "difference": "...",
+            "source": "..."
+        }},
+        {{
+            "category": "Duration",
+            "document_a": "...",
+            "document_b": "...",
+            "difference": "...",
+            "source": "..."
+        }},
+        {{
+            "category": "Renewal",
+            "document_a": "...",
+            "document_b": "...",
+            "difference": "...",
+            "source": "..."
+        }},
+        {{
+            "category": "Liability",
+            "document_a": "...",
+            "document_b": "...",
+            "difference": "...",
+            "source": "..."
+        }},
+        {{
+            "category": "Confidentiality",
+            "document_a": "...",
+            "document_b": "...",
+            "difference": "...",
+            "source": "..."
+        }},
+        {{
+            "category": "Obligations",
+            "document_a": "...",
+            "document_b": "...",
+            "difference": "...",
+            "source": "..."
+        }}
+    ],
+    "overall_differences": "...",
+    "disclaimer": "LexiGuard provides AI-assisted document analysis and is not a substitute for professional legal advice."
+}}
 
-    prompt = f"""
-You are LexiGuard, an AI-assisted legal document
-comparison system.
-
-Compare Document A and Document B using ONLY the
-information provided in their respective contexts.
-
-Do not invent, assume, or infer information.
-
-Compare the following areas:
-
-1. PAYMENT
-2. TERMINATION
-3. DURATION
-4. RENEWAL
-5. LIABILITY
-6. CONFIDENTIALITY
-7. IMPORTANT OBLIGATIONS
-
-For each area:
-
-- State the relevant information from Document A.
-- State the relevant information from Document B.
-- Clearly describe the factual difference, if any.
-- Include the relevant section and page for each document
-  whenever available.
-
-If there is no material difference identified from the
-provided context, write:
-
-No material difference identified from the provided context.
-
-Do not rank the documents.
-
-Do not say that one document is better, worse, safer,
-riskier, or more favorable.
-
-Only describe factual differences supported by the
-provided documents.
-
-LexiGuard provides AI-assisted document analysis and
-is not a substitute for professional legal advice.
-
-DOCUMENT A CONTEXT:
-
+DOCUMENT A CONTEXT
+------------------
 {document_a_context}
 
-
-DOCUMENT B CONTEXT:
-
+DOCUMENT B CONTEXT
+------------------
 {document_b_context}
-
-
-DOCUMENT COMPARISON RESULT:
 """
-
-    return prompt

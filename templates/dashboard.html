@@ -1,0 +1,171 @@
+{% extends "layout.html" %}
+
+{% block title %}LexiGuard | Executive Dashboard{% endblock %}
+
+{% block header_eyebrow %}LEGAL DOCUMENT INTELLIGENCE{% endblock %}
+{% block header_title %}Executive Dashboard{% endblock %}
+
+{% block header_actions %}
+<a href="/documents" class="btn btn-primary btn-sm">
+    <span>+</span> Upload Document
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner Card (Clean SaaS Styling) -->
+<section class="card" style="margin-bottom: 24px; background: var(--surface); border: 1px solid var(--border);">
+    <div class="card-body" style="padding: 24px 28px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+            <div style="max-width: 720px;">
+                <span class="badge badge-info" style="margin-bottom: 10px;">ENTERPRISE LEGAL AI</span>
+                <h2 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+                    Welcome to LexiGuard Intelligence Workspace
+                </h2>
+                <p style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 18px;">
+                    Analyze legal contracts, verify clause grounding, execute side-by-side agreement comparisons, and research constitutional law with instant AI assistance.
+                </p>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <a href="/documents" class="btn btn-primary">
+                        <span>▤</span> Document Repository
+                    </a>
+                    <a href="/analyze" class="btn btn-outline">
+                        <span>✦</span> Start AI Analysis
+                    </a>
+                    <a href="/compare" class="btn btn-secondary">
+                        <span>⇄</span> Compare Agreements
+                    </a>
+                </div>
+            </div>
+            <div style="font-size: 48px; color: var(--primary); opacity: 0.15; user-select: none;">
+                ⚖
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Executive Statistics Grid (4 Key Metric Cards) -->
+<section class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-label">Stored Documents</span>
+        <strong class="stat-value" id="documentCount">—</strong>
+        <span class="stat-description">PDF files uploaded</span>
+    </div>
+
+    <div class="stat-card">
+        <span class="stat-label">AI Analyses Executed</span>
+        <strong class="stat-value" id="analysisCount">—</strong>
+        <span class="stat-description">Risk & summary reports</span>
+    </div>
+
+    <div class="stat-card">
+        <span class="stat-label">Contract Comparisons</span>
+        <strong class="stat-value" id="comparisonCount">—</strong>
+        <span class="stat-description">Side-by-side matrices</span>
+    </div>
+
+    <div class="stat-card">
+        <span class="stat-label">Q&A Chat Sessions</span>
+        <strong class="stat-value" id="chatCount">—</strong>
+        <span class="stat-description">Interactive AI sessions</span>
+    </div>
+</section>
+
+<!-- Quick Actions & Tools Workspace Grid -->
+<section class="card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <div>
+            <h3 class="card-title">Quick Actions & Workspaces</h3>
+            <p class="card-subtitle">Direct shortcuts to core legal workflows</p>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="tools-grid">
+            <a href="/documents" class="tool-card">
+                <div class="tool-icon">▤</div>
+                <h4 style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Document Repository</h4>
+                <p style="font-size: 12.5px; color: var(--text-secondary);">Upload, inspect, and organize stored legal agreements.</p>
+            </a>
+
+            <a href="/analyze" class="tool-card">
+                <div class="tool-icon">✦</div>
+                <h4 style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Conversational AI Analysis</h4>
+                <p style="font-size: 12.5px; color: var(--text-secondary);">Ask questions, extract clauses, and evaluate contract risks.</p>
+            </a>
+
+            <a href="/compare" class="tool-card">
+                <div class="tool-icon">⇄</div>
+                <h4 style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Contract Comparison</h4>
+                <p style="font-size: 12.5px; color: var(--text-secondary);">Compare two agreements side-by-side for differences.</p>
+            </a>
+
+            <a href="/constitution" class="tool-card">
+                <div class="tool-icon">📜</div>
+                <h4 style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Constitution of India</h4>
+                <p style="font-size: 12.5px; color: var(--text-secondary);">Research articles, fundamental rights, and writs.</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Stored Documents & Recent Activity -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 24px;">
+    
+    <!-- Recent Documents Table Card -->
+    <section class="card">
+        <div class="card-header">
+            <div>
+                <span class="badge badge-info" style="margin-bottom: 4px;">REPOSITORY</span>
+                <h3 class="card-title">Recent Documents</h3>
+            </div>
+            <a href="/documents" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            <div id="recentDocumentsContainer" style="padding: 16px;">
+                <div class="empty-state" style="padding: 20px; text-align: center;">
+                    <span style="font-size: 24px; color: var(--text-muted);">▤</span>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Loading stored documents...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Activity Log Card -->
+    <section class="card">
+        <div class="card-header">
+            <div>
+                <span class="badge badge-secondary" style="margin-bottom: 4px;">AUDIT LOG</span>
+                <h3 class="card-title">Recent Activity</h3>
+            </div>
+            <a href="/history" class="btn btn-secondary btn-sm">View History</a>
+        </div>
+        <div class="card-body">
+            <div id="recentActivityContainer">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: var(--primary);">✦</span>
+                            <div>
+                                <strong style="font-size: 13px; color: var(--text-primary); display: block;">System Initialized</strong>
+                        
+                            </div>
+                        </div>
+                        <span class="badge badge-success">ACTIVE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Legal AI Disclaimer Bar -->
+<div class="disclaimer-bar">
+    <span style="font-size: 15px; color: var(--primary);">ℹ</span>
+    <div style="color: var(--text-secondary);">
+        <strong style="color: var(--text-primary);">Legal AI Disclaimer:</strong> LexiGuard provides AI-assisted document intelligence for research and analysis purposes. It does not constitute formal legal counsel.
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}?v=2.5.0"></script>
+{% endblock %}

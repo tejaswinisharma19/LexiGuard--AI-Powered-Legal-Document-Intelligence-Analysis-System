@@ -1,0 +1,205 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}AI Activity{% endblock %}
+
+{% block header_eyebrow %}AI ACTIVITY AUDIT{% endblock %}
+{% block header_title %}AI Operations Log{% endblock %}
+
+{% block header_actions %}
+<span class="badge badge-info" id="aiCountBadge" style="font-size: 12px; padding: 6px 12px;">
+    Loading...
+</span>
+{% endblock %}
+
+{% block content %}
+<section class="admin-page-header">
+    <div class="admin-header-text">
+        <h2>AI Operation Activity Log</h2>
+        <p>Audit trail of AI clause extractions, contract risk evaluations, executive summaries, and grounded legal Q&A.</p>
+    </div>
+</section>
+
+<section class="admin-table-card">
+    <div class="admin-table-card-header">
+        <div class="header-info">
+            <h3>AI Operations Stream</h3>
+            <p>Monitored AI requests executed by legal analysts across all stored agreements</p>
+        </div>
+
+        <!-- Filter Buttons Bar -->
+        <div class="admin-filter-bar">
+            <button type="button" class="admin-filter-btn active" data-filter="all">All Operations</button>
+            <button type="button" class="admin-filter-btn" data-filter="qa">Q&A / Chat</button>
+            <button type="button" class="admin-filter-btn" data-filter="clause">Clause Analysis</button>
+            <button type="button" class="admin-filter-btn" data-filter="summary">Summaries</button>
+            <button type="button" class="admin-filter-btn" data-filter="risk">Risk Evaluation</button>
+        </div>
+    </div>
+
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th style="width: 170px;">Operation</th>
+                    <th>Target Document</th>
+                    <th>User Account</th>
+                    <th style="width: 180px;">Timestamp</th>
+                    <th style="width: 130px;">Status</th>
+                </tr>
+            </thead>
+            <tbody id="aiActivityBody">
+                <tr>
+                    <td colspan="5" class="admin-table-state">
+                        <div class="admin-table-state-icon">✦</div>
+                        <div class="admin-table-state-title">Loading AI Operation Telemetry...</div>
+                        <p>Aggregating AI operations and model execution logs.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let allActivities = [];
+    let activeFilter = 'all';
+
+    async function loadAIActivity() {
+        const tbody = document.getElementById('aiActivityBody');
+        const badge = document.getElementById('aiCountBadge');
+
+        try {
+            const res = await fetch('/api/admin/ai-activity');
+            if (!res.ok) throw new Error('Failed to load AI activity stream.');
+            allActivities = await res.json();
+
+            if (badge) {
+                badge.textContent = `${allActivities.length.toLocaleString()} Operations`;
+            }
+
+            renderAIActivities();
+        } catch (err) {
+            console.error('Error fetching AI activity:', err);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="admin-table-state">
+                        <div class="admin-table-state-icon" style="color: var(--danger);">⚠</div>
+                        <div class="admin-table-state-title" style="color: var(--danger);">Error Loading AI Activity</div>
+                        <p>Access forbidden or a server error occurred while retrieving AI audit logs.</p>
+                    </td>
+                </tr>
+            `;
+            if (badge) badge.textContent = 'Error';
+        }
+    }
+
+    function renderAIActivities() {
+        const tbody = document.getElementById('aiActivityBody');
+        tbody.innerHTML = '';
+
+        const filtered = allActivities.filter(act => {
+            if (activeFilter === 'all') return true;
+            const op = (act.operation || '').toLowerCase();
+            if (activeFilter === 'qa') {
+                return op.includes('q&a') || op.includes('chat') || op.includes('qa');
+            }
+            if (activeFilter === 'clause') {
+                return op.includes('clause');
+            }
+            if (activeFilter === 'summary') {
+                return op.includes('summary') || op.includes('summarize');
+            }
+            if (activeFilter === 'risk') {
+                return op.includes('risk');
+            }
+            return op.includes(activeFilter);
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="admin-table-state">
+                        <div class="admin-table-state-icon">∅</div>
+                        <div class="admin-table-state-title">No Matching Operations</div>
+                        <p>No AI operations recorded matching the selected filter.</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        filtered.forEach(act => {
+            const tr = document.createElement('tr');
+            const op = act.operation || 'ANALYSIS';
+            const opUpper = op.toUpperCase();
+            const timeStr = act.timestamp ? act.timestamp.replace('T', ' ').substring(0, 19) : 'N/A';
+            const docName = act.document_name || 'Document';
+
+            // Clean badge styling
+            let badgeClass = 'badge-info';
+            let icon = '✦';
+            if (opUpper.includes('CHAT') || opUpper.includes('Q&A')) {
+                badgeClass = 'badge-info';
+                icon = '💬';
+            } else if (opUpper.includes('RISK')) {
+                badgeClass = 'badge-warning';
+                icon = '⚠';
+            } else if (opUpper.includes('CLAUSE')) {
+                badgeClass = 'badge-secondary';
+                icon = '§';
+            } else if (opUpper.includes('SUMMARY')) {
+                badgeClass = 'badge-info';
+                icon = '📋';
+            }
+
+            tr.innerHTML = `
+                <td>
+                    <span class="badge ${badgeClass}">${icon} ${escapeHtml(opUpper)}</span>
+                </td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="color: var(--text-muted);">📄</span>
+                        <strong class="cell-strong truncate-cell" title="${escapeHtml(docName)}">
+                            ${escapeHtml(docName)}
+                        </strong>
+                    </div>
+                </td>
+                <td>
+                    <span class="cell-subtle">${escapeHtml(act.user_id || 'System')}</span>
+                </td>
+                <td>
+                    <span class="cell-timestamp">${timeStr}</span>
+                </td>
+                <td>
+                    <span class="badge badge-success">● ${escapeHtml(act.status || 'Completed')}</span>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // Filter button handling
+    document.querySelectorAll('.admin-filter-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.admin-filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            activeFilter = this.dataset.filter;
+            renderAIActivities();
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', loadAIActivity);
+</script>
+{% endblock %}

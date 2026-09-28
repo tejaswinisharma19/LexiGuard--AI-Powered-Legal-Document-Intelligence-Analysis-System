@@ -1,14 +1,39 @@
 # Virtual Environment
 venv/
+env/
+ENV/
 
-# Environment Variables
+# Environment Variables & Secrets
 .env
+.env.local
+.env.*.local
 
-# Python Cache
+# Python Cache & Bytecode
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
 
-# VS Code Settings
+# Testing & Coverage Caches
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Temporary / Scratch Files
+scratch/
+*.log
+*.tmp
+*.bak
+*.swp
+
+# IDE & Editor Settings
 .vscode/
+.idea/
+*.sublime-workspace
 
-uploads/
+# Runtime Uploads (Preserve directory structure via .gitkeep)
+uploads/*
+!uploads/.gitkeep

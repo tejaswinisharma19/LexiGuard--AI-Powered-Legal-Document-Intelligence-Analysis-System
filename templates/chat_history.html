@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block title %}LexiGuard | Chat History{% endblock %}
+
+{% block header_eyebrow %}CONVERSATION AUDIT LOGS{% endblock %}
+{% block header_title %}Chat History{% endblock %}
+
+{% block header_actions %}
+<a href="/documents" class="btn btn-secondary btn-sm">
+    <span>←</span> Document Repository
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Document Filter Selector Card -->
+<section class="card filter-card" style="margin-bottom: 24px;">
+    <div style="display: flex; align-items: center; gap: 12px; flex: 1; flex-wrap: wrap;">
+        <label for="chatDocSelect" class="form-label" style="margin: 0; white-space: nowrap; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; color: var(--text-muted);">
+            Select Document:
+        </label>
+        <select id="chatDocSelect" class="form-select" style="flex: 1; min-width: 220px; font-weight: 600;">
+            <option value="">Select a document to load chat history...</option>
+        </select>
+    </div>
+    <button class="btn btn-secondary btn-sm" id="refreshChatHistory" type="button">
+        <span>↻</span> Refresh
+    </button>
+</section>
+
+<!-- Chat History Container Section -->
+<section class="card" id="chatHistory" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <div>
+            <span class="badge badge-info" style="margin-bottom: 4px;">INTERACTIVE CONVERSATION LOGS</span>
+            <h3 class="card-title" style="color: var(--text-main);">Previous AI Q&A Conversations</h3>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="documents-container" id="chatHistoryContainer">
+            <div class="empty-state">
+                <div class="empty-icon">💬</div>
+                <h4 style="font-size: 15px; font-weight: 700; color: var(--text-main);">Select a document</h4>
+                <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px;">Select a document from the dropdown above to view previous interactive Q&A conversations.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Legal Disclaimer Bar -->
+<div class="disclaimer-bar">
+    <span style="font-size: 15px; color: var(--accent-blue);">ℹ</span>
+    <div style="color: var(--text-secondary);">
+        <strong style="color: var(--text-main);">Legal Disclaimer:</strong> LexiGuard provides AI-assisted document analysis for informational purposes only. It is not a substitute for professional legal advice.
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

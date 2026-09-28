@@ -128,15 +128,13 @@ llm = LexiGuardLLM()
 
 print("\nExtracting legal clauses...")
 
-clause_analysis = llm.generate(prompt)
+try:
+    clause_analysis = llm.generate(prompt)
 
+    print("\n" + "=" * 60)
+    print("CLAUSE EXTRACTION RESULT")
+    print("=" * 60)
 
-# -----------------------------
-# Display result
-# -----------------------------
-
-print("\n" + "=" * 60)
-print("CLAUSE EXTRACTION RESULT")
-print("=" * 60)
-
-print("\n" + clause_analysis)
+    print("\n" + clause_analysis)
+except RuntimeError as error:
+    print(f"\n[Note: Live Gemini API skipped due to quota: {error}]")

@@ -134,15 +134,13 @@ llm = LexiGuardLLM()
 
 print("\nGenerating document summary...")
 
-summary = llm.generate(prompt)
+try:
+    summary = llm.generate(prompt)
 
+    print("\n" + "=" * 60)
+    print("DOCUMENT SUMMARY")
+    print("=" * 60)
 
-# -----------------------------
-# Display summary
-# -----------------------------
-
-print("\n" + "=" * 60)
-print("DOCUMENT SUMMARY")
-print("=" * 60)
-
-print("\n" + summary)
+    print("\n" + summary)
+except RuntimeError as error:
+    print(f"\n[Note: Live Gemini API skipped due to quota: {error}]")

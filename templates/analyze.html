@@ -1,0 +1,162 @@
+{% extends "layout.html" %}
+
+{% block title %}LexiGuard | {% if is_constitution_mode %}Constitution of India Research{% else %}AI Legal Analysis Workspace{% endif %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analyze.css') }}?v=2.5.0">
+{% endblock %}
+
+{% block header_eyebrow %}{% if is_constitution_mode %}CONSTITUTIONAL LEGAL RESEARCH{% else %}AI DOCUMENT ANALYSIS{% endif %}{% endblock %}
+{% block header_title %}{% if is_constitution_mode %}Constitution of India Research{% else %}AI Analysis Workspace{% endif %}{% endblock %}
+
+{% block header_actions %}
+<a href="/documents" class="btn btn-secondary btn-sm">
+    <span>←</span> Document Repository
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Top Workspace Document Context Header Bar -->
+<section class="card" style="margin-bottom: 20px;">
+    <div class="card-body" style="padding: 16px 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+            
+            <!-- Document Selector / Title -->
+            <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 280px;">
+                <div class="document-icon" style="width: 40px; height: 40px; font-size: 14px; font-weight: 700; background: var(--primary-light); color: var(--primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;">
+                    {% if is_constitution_mode %}📜{% else %}PDF{% endif %}
+                </div>
+                <div style="flex: 1;">
+                    {% if is_constitution_mode %}
+                    <span class="badge badge-info" style="margin-bottom: 2px;">KNOWLEDGE BASE</span>
+                    <h2 id="documentName" style="font-size: 16px; font-weight: 700; color: var(--text-primary);">Constitution of India</h2>
+                    <p id="documentMetadata" style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                        Full text knowledge base RAG · Articles, Parts, Chapters & Constitutional Clauses
+                    </p>
+                    {% else %}
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap;">
+                        <span class="badge badge-info">SELECTED DOCUMENT</span>
+                        <select id="analysisDocSelect" class="form-select" style="max-width: 340px; font-size: 13px; font-weight: 600; padding: 4px 10px;">
+                            <option value="">Select a document to analyze...</option>
+                        </select>
+                    </div>
+                    <h2 id="documentName" style="font-size: 15px; font-weight: 700; color: var(--text-primary);">Select a document above</h2>
+                    <p id="documentMetadata" style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                        Document metadata will appear here once selected.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Download PDF Report & Clear Chat Stream Controls -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <a id="downloadReportBtn" href="#" target="_blank" class="btn btn-outline btn-sm" style="display: none; gap: 6px;">
+                    <span>📥</span> Download PDF Report
+                </a>
+                <button type="button" class="btn btn-secondary btn-sm" id="clearChatButton" title="Clear Chat Stream">
+                    Clear Chat
+                </button>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Live Conversational ChatGPT-Style Chat Workspace -->
+<div class="chat-workspace">
+    
+    <!-- Chat Messages Scroll Container -->
+    <div class="chat-messages-container" id="chatMessagesContainer">
+        
+        <!-- Welcome Initial State Card -->
+        <div class="chat-message chat-message-ai" id="chatWelcomeCard">
+            <div class="message-avatar">✦</div>
+            <div class="message-bubble">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <span class="badge badge-info" id="analysisLabel">
+                        {% if is_constitution_mode %}CONSTITUTION RESEARCH{% else %}LEGAL AI ASSISTANT{% endif %}
+                    </span>
+                    <span id="questionStatus" style="font-size: 11px; color: var(--text-muted);">Ready</span>
+                </div>
+
+                <h4 style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px;" id="analysisHeading">
+                    {% if is_constitution_mode %}Ask LexiGuard about the Constitution of India{% else %}LexiGuard Legal Intelligence Workspace{% endif %}
+                </h4>
+
+                <p style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+                    {% if is_constitution_mode %}
+                    Explore Articles, Fundamental Rights, Writs, and Constitutional Remedies. Answers are grounded directly in the official constitutional text.
+                    {% else %}
+                    Ask questions about your legal agreement. LexiGuard extracts obligations, flags compliance risks, and provides grounded page citations.
+                    {% endif %}
+                </p>
+
+                <!-- Suggested Prompt Chips -->
+                <div style="background: var(--bg-subtle); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                    <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px;">
+                        SUGGESTED PROMPTS:
+                    </span>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        {% if is_constitution_mode %}
+                        <button type="button" class="chip-button suggestion-button" data-question="What does Article 14 mandate regarding equality before law?">Article 14 (Equality)</button>
+                        <button type="button" class="chip-button suggestion-button" data-question="What is Article 21 regarding right to life and personal liberty?">Article 21 (Right to Life)</button>
+                        <button type="button" class="chip-button suggestion-button" data-question="What does Article 32 state about constitutional remedies and writs?">Article 32 (Writs & Remedies)</button>
+                        <button type="button" class="chip-button suggestion-button" data-question="Explain fundamental duties under Article 51A.">Article 51A (Duties)</button>
+                        <button type="button" class="chip-button suggestion-button" data-question="What is the procedure for amending the Constitution under Article 368?">Article 368 (Amendments)</button>
+                        {% else %}
+                        <button type="button" class="chip-button suggestion-button" data-question="Summarize the termination clause in this contract.">Summarize termination clause</button>
+                        <button type="button" class="chip-button suggestion-button" data-question="What are the payment and financial obligations?">What are payment obligations?</button>
+                        <button type="button" class="chip-button suggestion-button" data-question="Identify potential liability concerns and limits.">Identify liability concerns</button>
+                        <button type="button" class="chip-button suggestion-button" data-question="What happens in case of breach or default?">What happens in case of breach?</button>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Sticky Bottom Composer Bar -->
+    <div class="chat-composer-bar">
+        
+        <!-- Automated Quick Action Chips Row -->
+        {% if not is_constitution_mode %}
+        <div class="composer-actions-row">
+            <div class="action-chip-group">
+                <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">AUTOMATED ACTIONS:</span>
+                <button type="button" class="btn btn-outline btn-sm" id="summarizeDocumentButton">Generate Summary</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="riskAnalysisButton" style="color: #B91C1C; border-color: rgba(185, 28, 28, 0.3);">Analyze Risks</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="clauseExtractionButton" style="color: #15803D; border-color: rgba(21, 128, 61, 0.3);">Extract Clauses</button>
+            </div>
+            <span id="analysisIntent" class="badge badge-secondary" style="font-size: 10px; text-transform: uppercase;">READY</span>
+        </div>
+        {% endif %}
+
+        <!-- Input Textarea Row -->
+        <div class="composer-input-row">
+            <textarea id="questionInput" class="composer-textarea" rows="1" placeholder="{% if is_constitution_mode %}Ask LexiGuard about the Constitution of India...{% else %}Ask LexiGuard about this legal document...{% endif %}"></textarea>
+            <button type="button" class="btn btn-primary btn-sm" id="askButton" style="gap: 6px;">
+                <span>✦</span> Send
+            </button>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; padding: 0 4px;">
+            <span style="font-size: 11px; color: var(--text-muted);">Press Enter to send · Shift + Enter for newline</span>
+            <div id="sourcesContainer" style="display: inline-block;"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Legal Safety Disclaimer Bar -->
+<div class="disclaimer-bar">
+    <span style="font-size: 15px; color: var(--primary);">ℹ</span>
+    <div style="color: var(--text-secondary);">
+        <strong style="color: var(--text-primary);">Legal Disclaimer:</strong> LexiGuard provides AI-assisted document and constitutional intelligence for research purposes. It is not a substitute for formal legal counsel.
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/analyze.js') }}?v=2.5.0"></script>
+{% endblock %}

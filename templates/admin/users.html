@@ -1,0 +1,173 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Users{% endblock %}
+
+{% block header_eyebrow %}USER MANAGEMENT{% endblock %}
+{% block header_title %}Registered Accounts{% endblock %}
+
+{% block header_actions %}
+<span class="badge badge-info" id="usersCountBadge" style="font-size: 12px; padding: 6px 12px;">
+    Loading...
+</span>
+{% endblock %}
+
+{% block content %}
+<section class="admin-page-header">
+    <div class="admin-header-text">
+        <h2>User Account Directory</h2>
+        <p>Manage registered legal analysts, attorneys, and system administrative privileges.</p>
+    </div>
+</section>
+
+<section class="admin-table-card">
+    <div class="admin-table-card-header">
+        <div class="header-info">
+            <h3>Registered Users</h3>
+            <p>Complete directory of accounts with access to the LexiGuard platform</p>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <input type="text"
+                   id="userSearchInput"
+                   class="admin-search-input"
+                   placeholder="Search by name or email..."
+                   autocomplete="off">
+        </div>
+    </div>
+
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Email Address</th>
+                    <th style="width: 120px;">Role</th>
+                    <th style="width: 140px;">Status</th>
+                    <th style="width: 180px;">Registered Date</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody">
+                <tr>
+                    <td colspan="5" class="admin-table-state">
+                        <div class="admin-table-state-icon">👥</div>
+                        <div class="admin-table-state-title">Loading User Accounts...</div>
+                        <p>Fetching user directory from the administrative database.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let allUsers = [];
+
+    async function loadUsers() {
+        const tbody = document.getElementById('usersTableBody');
+        const badge = document.getElementById('usersCountBadge');
+
+        try {
+            const res = await fetch('/api/admin/users');
+            if (!res.ok) throw new Error('Failed to load user directory.');
+            allUsers = await res.json();
+
+            if (badge) {
+                badge.textContent = `${allUsers.length.toLocaleString()} Users`;
+            }
+
+            renderUsers(allUsers);
+        } catch (err) {
+            console.error('Error fetching users:', err);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="admin-table-state">
+                        <div class="admin-table-state-icon" style="color: var(--danger);">⚠</div>
+                        <div class="admin-table-state-title" style="color: var(--danger);">Error Loading User Accounts</div>
+                        <p>Access forbidden or a server error occurred while retrieving user accounts.</p>
+                    </td>
+                </tr>
+            `;
+            if (badge) badge.textContent = 'Error';
+        }
+    }
+
+    function renderUsers(usersToRender) {
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
+
+        if (!usersToRender || usersToRender.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="admin-table-state">
+                        <div class="admin-table-state-icon">∅</div>
+                        <div class="admin-table-state-title">No Accounts Found</div>
+                        <p>No user records matched your search query.</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        usersToRender.forEach(u => {
+            const tr = document.createElement('tr');
+            const name = u.full_name || u.email || 'Unnamed User';
+            const initial = (name[0] || 'U').toUpperCase();
+            const isAdmin = (u.role || '').toLowerCase() === 'admin';
+            const roleBadge = isAdmin
+                ? '<span class="badge badge-info" style="font-weight: 700;">ADMIN</span>'
+                : '<span class="badge badge-secondary">User</span>';
+            const statusBadge = '<span class="badge badge-success">● Active</span>';
+            const regDate = u.created_at ? u.created_at.replace('T', ' ').substring(0, 19) : 'N/A';
+
+            tr.innerHTML = `
+                <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--bg-subtle); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary); font-size: 13px;">
+                            ${escapeHtml(initial)}
+                        </div>
+                        <strong class="cell-strong">${escapeHtml(name)}</strong>
+                    </div>
+                </td>
+                <td>
+                    <span class="cell-subtle">${escapeHtml(u.email || '')}</span>
+                </td>
+                <td>${roleBadge}</td>
+                <td>${statusBadge}</td>
+                <td>
+                    <span class="cell-timestamp">${regDate}</span>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // Client-side search filtering
+    document.getElementById('userSearchInput').addEventListener('input', function (e) {
+        const query = e.target.value.trim().toLowerCase();
+        if (!query) {
+            renderUsers(allUsers);
+            return;
+        }
+        const filtered = allUsers.filter(u => {
+            const name = (u.full_name || '').toLowerCase();
+            const email = (u.email || '').toLowerCase();
+            return name.includes(query) || email.includes(query);
+        });
+        renderUsers(filtered);
+    });
+
+    document.addEventListener('DOMContentLoaded', loadUsers);
+</script>
+{% endblock %}

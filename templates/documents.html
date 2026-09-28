@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block title %}LexiGuard | Document Repository{% endblock %}
+
+{% block header_eyebrow %}DOCUMENT MANAGEMENT{% endblock %}
+{% block header_title %}Document Repository{% endblock %}
+
+{% block header_actions %}
+<button class="btn btn-primary btn-sm" id="uploadButton" type="button">
+    <span>+</span> Upload PDF
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Page Description Header Card -->
+<section class="card" style="margin-bottom: 24px;">
+    <div class="card-body" style="padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <span class="badge badge-info" style="margin-bottom: 4px;">SECURE STORAGE</span>
+            <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary);">Legal Document Repository</h2>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">
+                Manage your legal agreements, contracts, and PDFs. Select any document to launch AI analysis or side-by-side comparison.
+            </p>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="refreshDocuments" type="button">
+            <span>↻</span> Refresh Repository
+        </button>
+    </div>
+</section>
+
+<!-- Upload PDF Dropzone Card Banner -->
+<section class="upload-dropzone-card" id="uploadDropzone" onclick="document.getElementById('documentInput').click()" style="cursor: pointer;">
+    <div style="font-size: 32px; color: var(--primary); margin-bottom: 8px;">▤</div>
+    <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary);">Upload Legal Document</h3>
+    <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+        Click or drag PDF files here to upload into your secure legal repository. (PDF format up to 25MB supported)
+    </p>
+</section>
+
+<!-- Document Repository Section & Clean Table Container -->
+<section class="card" id="documents" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <div>
+            <span class="badge badge-secondary" style="margin-bottom: 4px;">STORED FILES</span>
+            <h3 class="card-title">Stored Legal Documents</h3>
+        </div>
+    </div>
+
+    <div class="card-body" style="padding: 0;">
+        <div class="documents-container" id="documentsContainer" style="padding: 20px;">
+            <div class="empty-state" style="padding: 30px; text-align: center;">
+                <div style="font-size: 32px; color: var(--text-muted); margin-bottom: 8px;">◫</div>
+                <h4 style="color: var(--text-primary); font-size: 15px; font-weight: 700;">Loading document repository...</h4>
+                <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Fetching your stored legal files from LexiGuard cloud storage.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Hidden File Input for PDF Upload -->
+<input type="file" id="documentInput" accept=".pdf" hidden>
+
+<!-- Legal Safety Disclaimer Bar -->
+<div class="disclaimer-bar">
+    <span style="font-size: 15px; color: var(--primary);">ℹ</span>
+    <div style="color: var(--text-secondary);">
+        <strong style="color: var(--text-primary);">Legal Disclaimer:</strong> LexiGuard provides AI-assisted document storage and intelligence for research purposes.
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}?v=2.5.0"></script>
+{% endblock %}

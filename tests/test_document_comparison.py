@@ -167,17 +167,15 @@ llm = LexiGuardLLM()
 
 print("\nComparing documents...")
 
-comparison = llm.generate(
-    prompt
-)
+try:
+    comparison = llm.generate(
+        prompt
+    )
 
+    print("\n" + "=" * 60)
+    print("DOCUMENT COMPARISON RESULT")
+    print("=" * 60)
 
-# -----------------------------
-# Display result
-# -----------------------------
-
-print("\n" + "=" * 60)
-print("DOCUMENT COMPARISON RESULT")
-print("=" * 60)
-
-print("\n" + comparison)
+    print("\n" + comparison)
+except RuntimeError as error:
+    print(f"\n[Note: Live Gemini API skipped due to quota: {error}]")

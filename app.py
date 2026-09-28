@@ -1,272 +1,76 @@
-import os
-
-from flask import Flask, jsonify, request
-from werkzeug.utils import secure_filename
+import logging
+from flask import Flask, request
 
 from config import Config
-from aws.s3_service import S3Service
+from ai.graph import lexiguard_graph
 from document_processing.pdf_loader import extract_text_from_pdf
 from document_processing.text_chunker import create_text_chunks
-from ai.graph import lexiguard_graph
-
+from reports.analysis_report import generate_analysis_pdf
+from reports.comparison_report import generate_comparison_pdf
+import extensions
+from routes.admin import admin_bp
+from routes.analysis import analysis_bp
+from routes.api import api_bp
+from routes.auth import auth_bp
+from routes.documents import documents_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-
-# -----------------------------
-# Application Configuration
-# -----------------------------
-
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"pdf"}
-
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["ASSET_VERSION"] = "2.5.0"
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
-s3_service = S3Service()
-
-
-# -----------------------------
-# Helper Functions
-# -----------------------------
-
-def allowed_file(filename):
-    """
-    Check whether the uploaded file has an allowed extension.
-    """
-    return (
-        "." in filename
-        and filename.rsplit(".", 1)[1].lower()
-        in ALLOWED_EXTENSIONS
-    )
+@app.after_request
+def add_cache_control_header(response):
+    if request.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
 
 
-# -----------------------------
-# Home Route
-# -----------------------------
+# Re-export service singletons, decorators, utilities, and AI modules for full test compatibility
+postgresql_service = extensions.postgresql_service
+local_storage_service = extensions.local_storage_service
+s3_service = extensions.s3_service
+ses_service = extensions.ses_service
+sns_service = extensions.sns_service
+gmail_service = extensions.gmail_service
+dynamodb_service = extensions.dynamodb_service
 
-@app.route("/")
-def home():
-    """
-    Check whether the LexiGuard application is running.
-    """
-    return "LexiGuard is running successfully!"
+login_required = extensions.login_required
+admin_required = extensions.admin_required
+allowed_file = extensions.allowed_file
+build_document_context = extensions.build_document_context
+lexiguard_graph = lexiguard_graph
+extract_text_from_pdf = extract_text_from_pdf
+create_text_chunks = create_text_chunks
+generate_analysis_pdf = generate_analysis_pdf
+generate_comparison_pdf = generate_comparison_pdf
 
+# Register Flask Blueprints
+app.register_blueprint(auth_bp)
+app.register_blueprint(documents_bp)
+app.register_blueprint(analysis_bp)
+app.register_blueprint(admin_bp)
+app.register_blueprint(api_bp)
 
-# -----------------------------
-# Document Upload API
-# -----------------------------
+# Alias blueprint endpoints to top-level endpoint names for full url_for compatibility
+for rule in list(app.url_map.iter_rules()):
+    if "." in rule.endpoint and rule.endpoint != "static":
+        short_endpoint = rule.endpoint.split(".", 1)[1]
+        view_func = app.view_functions.get(rule.endpoint)
+        if view_func and short_endpoint not in [r.endpoint for r in app.url_map.iter_rules()]:
+            app.add_url_rule(
+                rule.rule,
+                endpoint=short_endpoint,
+                view_func=view_func,
+                methods=list(rule.methods) if rule.methods else None
+            )
 
-@app.route("/api/upload", methods=["POST"])
-def upload_document():
-    """
-    Upload a PDF, process it, and store it in S3.
-    """
-
-    if "file" not in request.files:
-        return jsonify({
-            "error": "No file was provided."
-        }), 400
-
-    file = request.files["file"]
-
-    if file.filename == "":
-        return jsonify({
-            "error": "No file was selected."
-        }), 400
-
-    if not allowed_file(file.filename):
-        return jsonify({
-            "error": "Only PDF files are supported."
-        }), 400
-
-    try:
-        # Secure the uploaded filename
-        filename = secure_filename(file.filename)
-
-        if not filename:
-            return jsonify({
-                "error": "Invalid filename."
-            }), 400
-
-        # Create temporary local storage
-        os.makedirs(
-            app.config["UPLOAD_FOLDER"],
-            exist_ok=True
-        )
-
-        local_file_path = os.path.join(
-            app.config["UPLOAD_FOLDER"],
-            filename
-        )
-
-        # Save uploaded PDF temporarily
-        file.save(local_file_path)
-
-        # Verify that the PDF contains extractable text
-        pages = extract_text_from_pdf(
-            local_file_path
-        )
-
-        # Define S3 object location
-        s3_object_key = f"documents/{filename}"
-
-        # Upload PDF to S3
-        s3_result = s3_service.upload_file(
-            local_file_path,
-            s3_object_key
-        )
-
-        # Collect metadata
-        file_size = os.path.getsize(
-            local_file_path
-        )
-
-        page_count = len(pages)
-
-        return jsonify({
-            "message": "PDF uploaded successfully.",
-            "document": {
-                "filename": filename,
-                "file_size_bytes": file_size,
-                "page_count": page_count,
-                "processing_status": "uploaded",
-                "storage": "s3",
-                "s3_object_key": s3_result["object_key"]
-            }
-        }), 201
-
-    except Exception as error:
-        return jsonify({
-            "error": "Unable to upload the document.",
-            "details": str(error)
-        }), 500
-
-
-# -----------------------------
-# Document Analysis API
-# -----------------------------
-
-@app.route("/api/analyze", methods=["POST"])
-def analyze_document():
-    """
-    Analyze a PDF stored in S3 using the LexiGuard AI pipeline.
-    """
-
-    # Read JSON request
-    data = request.get_json()
-
-    if not data:
-        return jsonify({
-            "error": "Request body must contain JSON."
-        }), 400
-
-    filename = data.get("filename")
-    question = data.get("question")
-
-    # Validate filename
-    if not filename:
-        return jsonify({
-            "error": "Filename is required."
-        }), 400
-
-    # Validate question
-    if not question:
-        return jsonify({
-            "error": "Question is required."
-        }), 400
-
-    # Secure filename
-    safe_filename = secure_filename(filename)
-
-    if safe_filename != filename:
-        return jsonify({
-            "error": "Invalid filename."
-        }), 400
-
-    # Validate extension
-    if not allowed_file(safe_filename):
-        return jsonify({
-            "error": "Only PDF files are supported."
-        }), 400
-
-    # S3 location of the document
-    s3_object_key = f"documents/{safe_filename}"
-
-    try:
-        # Check whether the document exists in S3
-        if not s3_service.file_exists(s3_object_key):
-            return jsonify({
-                "error": "Document not found in S3."
-            }), 404
-
-        # Create temporary local directory
-        os.makedirs(
-            app.config["UPLOAD_FOLDER"],
-            exist_ok=True
-        )
-
-        # Temporary local path
-        temporary_file_path = os.path.join(
-            app.config["UPLOAD_FOLDER"],
-            safe_filename
-        )
-
-        # Download PDF from S3
-        s3_service.download_file(
-            s3_object_key,
-            temporary_file_path
-        )
-
-        # Extract text from PDF
-        pages = extract_text_from_pdf(
-            temporary_file_path
-        )
-
-        # Create text chunks
-        chunks = create_text_chunks(
-            pages
-        )
-
-        # Initial LangGraph state
-        initial_state = {
-            "user_query": question,
-            "intent": "",
-            "chunks": chunks,
-            "response": "",
-            "sources": []
-        }
-
-        # Execute LangGraph workflow
-        result = lexiguard_graph.invoke(
-            initial_state
-        )
-
-        # Return analysis result
-        return jsonify({
-            "filename": safe_filename,
-            "question": question,
-            "intent": result["intent"],
-            "response": result["response"],
-            "sources": [
-                {
-                    "page_number": source["page_number"],
-                    "chunk_number": source["chunk_number"]
-                }
-                for source in result["sources"]
-            ]
-        })
-
-    except Exception as error:
-        return jsonify({
-            "error": "Unable to analyze the document.",
-            "details": str(error)
-        }), 500
-
-
-# -----------------------------
-# Application Entry Point
-# -----------------------------
 
 if __name__ == "__main__":
     app.run(debug=True)

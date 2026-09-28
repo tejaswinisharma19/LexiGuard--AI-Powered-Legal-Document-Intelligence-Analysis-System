@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LexiGuard | AI Legal Intelligence{% endblock %}</title>
+
+    <!-- Anti-Flash Theme Initializer -->
+    <script>
+        (function() {
+            try {
+                var savedTheme = localStorage.getItem('lexiguard_theme');
+                var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var currentTheme = savedTheme || (systemDark ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', currentTheme);
+            } catch (e) {}
+        })();
+    </script>
+
+    <!-- Authoritative LegalTech Core System Stylesheet with Cache-Busting -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/legal_tech.css') }}?v=2.5.0">
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+    <div class="app-shell">
+
+        <!-- Mobile Backdrop Overlay -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- ==========================================
+             Sidebar Navigation Shell
+        =========================================== -->
+        <aside class="sidebar">
+
+            <div class="sidebar-header">
+                <div class="sidebar-brand-icon">L</div>
+
+                <div style="flex: 1; overflow: hidden;">
+                    <div class="sidebar-brand-title">LEXIGUARD</div>
+                    <div class="sidebar-brand-subtitle">Legal Intelligence</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+
+                <div class="nav-section-label">WORKSPACE</div>
+
+                <a href="/dashboard"
+                   class="nav-link {% if request.path in ['/', '/dashboard'] %}active{% endif %}"
+                   data-tooltip="Dashboard">
+                    <span class="nav-icon">⌂</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="/documents"
+                   class="nav-link {% if request.path == '/documents' %}active{% endif %}"
+                   data-tooltip="Documents">
+                    <span class="nav-icon">▤</span>
+                    <span>Documents</span>
+                </a>
+
+                <a href="/analyze"
+                   class="nav-link {% if request.path in ['/analyze', '/analysis'] and not is_constitution_mode %}active{% endif %}"
+                   data-tooltip="AI Document Analysis">
+                    <span class="nav-icon">✦</span>
+                    <span>AI Analysis</span>
+                </a>
+
+                <a href="/compare"
+                   class="nav-link {% if request.path == '/compare' %}active{% endif %}"
+                   data-tooltip="Compare Agreements">
+                    <span class="nav-icon">⇄</span>
+                    <span>Compare</span>
+                </a>
+
+                <a href="/constitution"
+                   class="nav-link {% if request.path == '/constitution' or is_constitution_mode %}active{% endif %}"
+                   data-tooltip="Constitution Q&A">
+                    <span class="nav-icon">📜</span>
+                    <span>Constitution of India</span>
+                </a>
+
+                <div class="nav-section-label">HISTORY</div>
+
+                <a href="/history"
+                   class="nav-link {% if request.path == '/history' %}active{% endif %}"
+                   data-tooltip="Analysis History">
+                    <span class="nav-icon">◷</span>
+                    <span>Analysis History</span>
+                </a>
+
+                <a href="/chat-history"
+                   class="nav-link {% if request.path == '/chat-history' %}active{% endif %}"
+                   data-tooltip="Chat History">
+                    <span class="nav-icon">💬</span>
+                    <span>Chat History</span>
+                </a>
+
+                <a href="/comparison-history"
+                   class="nav-link {% if request.path == '/comparison-history' %}active{% endif %}"
+                   data-tooltip="Comparison History">
+                    <span class="nav-icon">⇄</span>
+                    <span>Comparison History</span>
+                </a>
+
+                <div class="nav-section-label">ACCOUNT</div>
+
+                <a href="/profile"
+                   class="nav-link {% if request.path == '/profile' %}active{% endif %}"
+                   data-tooltip="My Profile">
+                    <span class="nav-icon">👤</span>
+                    <span>My Profile</span>
+                </a>
+
+                <a href="/settings"
+                   class="nav-link {% if request.path == '/settings' %}active{% endif %}"
+                   data-tooltip="Settings">
+                    <span class="nav-icon">⚙</span>
+                    <span>Settings</span>
+                </a>
+
+                {% if session.get('is_admin') %}
+                <div class="nav-section-label">ADMINISTRATION</div>
+
+                <a href="/admin"
+                   class="nav-link {% if request.path.startswith('/admin') %}active{% endif %}"
+                   data-tooltip="Admin Portal">
+                    <span class="nav-icon">🛡</span>
+                    <span>Admin Portal</span>
+                </a>
+                {% endif %}
+
+            </nav>
+
+            <div class="sidebar-footer">
+
+                <div class="user-profile-box">
+
+                    <div class="user-avatar">
+                        {{ (user_name or session.get('user_name', 'Legal User'))[0] | upper }}
+                    </div>
+
+                    <div class="user-info">
+                        <span class="user-name" id="userDisplayName">
+                            {{ user_name or session.get('user_name', 'Legal User') }}
+                        </span>
+
+                        <span class="user-role">
+                            {% if session.get('is_admin') %}
+                                Administrator
+                            {% else %}
+                                Legal Analyst
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <a href="{{ url_for('logout') }}"
+                       id="logoutBtn"
+                       class="logout-link">
+                        Logout
+                    </a>
+
+                </div>
+
+                <div class="system-status">
+                    <span class="status-dot-active"></span>
+                    <span>AI Engine Active & Ready</span>
+                </div>
+
+            </div>
+
+        </aside>
+
+        <!-- ==========================================
+             Main Work Area Shell
+        =========================================== -->
+        <div class="main-wrapper">
+
+            <!-- Top Header Bar -->
+            <header class="top-header">
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+
+                    <div class="header-title-group">
+                        <p>
+                            {% block header_eyebrow %}
+                                LEGAL DOCUMENT INTELLIGENCE
+                            {% endblock %}
+                        </p>
+
+                        <h1>
+                            {% block header_title %}
+                                Dashboard
+                            {% endblock %}
+                        </h1>
+                    </div>
+
+                </div>
+
+                <div class="header-actions">
+
+                    <!-- Dark / Light Theme Toggle Button -->
+                    <button type="button"
+                            id="themeToggleBtn"
+                            class="header-toggle-btn"
+                            aria-label="Toggle Theme"
+                            title="Toggle Light / Dark Mode">
+                        🌙
+                    </button>
+
+                    {% block header_actions %}{% endblock %}
+
+                </div>
+
+            </header>
+
+            <!-- Notification Toast Container -->
+            <div id="toastContainer"
+                 aria-live="polite"
+                 aria-atomic="true">
+            </div>
+
+            <!-- Page Content Body -->
+            <main class="content-body">
+                {% block content %}{% endblock %}
+            </main>
+
+        </div>
+
+    </div>
+
+    <!-- Core App JS with Cache-Busting -->
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=2.5.0"></script>
+
+    {% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

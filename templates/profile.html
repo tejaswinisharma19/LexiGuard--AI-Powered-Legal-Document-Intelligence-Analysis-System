@@ -1,0 +1,163 @@
+{% extends "layout.html" %}
+
+{% block title %}LexiGuard | My Profile{% endblock %}
+
+{% block header_eyebrow %}ACCOUNT MANAGEMENT{% endblock %}
+{% block header_title %}My Profile{% endblock %}
+
+{% block content %}
+<!-- Account Header Summary Card -->
+<div class="card" style="margin-bottom: 24px; background: var(--surface); border: 1px solid var(--border);">
+    <div class="card-body" style="padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--primary); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800; box-shadow: var(--shadow-md);">
+                {{ (user_name or email or 'U')[0] | upper }}
+            </div>
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap;">
+                    <h2 style="font-size: 22px; font-weight: 750; color: var(--text-primary); margin: 0;">{{ user_name or 'User' }}</h2>
+                    <span class="badge {% if is_admin %}badge-warning{% else %}badge-info{% endif %}">
+                        {% if is_admin %}System Administrator{% else %}Legal Analyst{% endif %}
+                    </span>
+                    <span class="badge badge-success">
+                        ● Active
+                    </span>
+                </div>
+                <p style="font-size: 13.5px; color: var(--text-secondary); margin: 0;">
+                    {{ email or user_id or 'Registered User' }}
+                </p>
+            </div>
+        </div>
+        <div>
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; display: block; margin-bottom: 4px;">ACCOUNT SECURITY</span>
+            <span class="badge badge-success" style="font-size: 11px;">Protected Account</span>
+        </div>
+    </div>
+</div>
+
+<!-- Personal Information & Activity Statistics Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px;">
+
+    <!-- Personal Information Card -->
+    <section class="card">
+        <div class="card-header">
+            <div>
+                <span class="badge badge-info" style="margin-bottom: 4px;">PERSONAL INFORMATION</span>
+                <h3 class="card-title">Account Details</h3>
+            </div>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                <div>
+                    <label class="form-label" style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Full Name</label>
+                    <div style="font-size: 14px; font-weight: 600; color: var(--text-primary); background: var(--bg-subtle); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                        {{ user_name or 'Not specified' }}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label" style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Email Address</label>
+                    <div style="font-size: 14px; font-weight: 600; color: var(--text-primary); background: var(--bg-subtle); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                        {{ email or user_id or 'Not specified' }}
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div>
+                    <label class="form-label" style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Account Role</label>
+                    <div style="font-size: 13.5px; font-weight: 600; color: var(--primary); background: var(--primary-light); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--primary-border);">
+                        {% if is_admin %}System Administrator{% else %}Legal Analyst{% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label" style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Account Status</label>
+                    <div style="font-size: 13.5px; font-weight: 600; color: var(--success); background: var(--success-bg); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--success-border);">
+                        Active
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Account Activity Statistics Card -->
+    <section class="card">
+        <div class="card-header">
+            <div>
+                <span class="badge badge-info" style="margin-bottom: 4px;">ACCOUNT ACTIVITY</span>
+                <h3 class="card-title">Activity Statistics</h3>
+            </div>
+        </div>
+        <div class="card-body" style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                <span style="font-size: 13px; color: var(--text-secondary);">Documents</span>
+                <strong style="font-size: 15px; color: var(--text-primary);">{{ user_stats.total_documents if user_stats and user_stats.total_documents is defined else 0 }}</strong>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                <span style="font-size: 13px; color: var(--text-secondary);">AI Analyses</span>
+                <strong style="font-size: 15px; color: var(--text-primary);">{{ user_stats.total_analyses if user_stats and user_stats.total_analyses is defined else 0 }}</strong>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                <span style="font-size: 13px; color: var(--text-secondary);">Comparisons</span>
+                <strong style="font-size: 15px; color: var(--text-primary);">{{ user_stats.total_comparisons if user_stats and user_stats.total_comparisons is defined else 0 }}</strong>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                <span style="font-size: 13px; color: var(--text-secondary);">Questions Asked</span>
+                <strong style="font-size: 15px; color: var(--text-primary);">{{ user_stats.total_chats if user_stats and user_stats.total_chats is defined else 0 }}</strong>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Account Security & Information Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px;">
+    <!-- Account Security Card -->
+    <section class="card">
+        <div class="card-header">
+            <div>
+                <span class="badge badge-warning" style="margin-bottom: 4px;">ACCOUNT SECURITY</span>
+                <h3 class="card-title">Password</h3>
+            </div>
+        </div>
+        <div class="card-body" style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                <div>
+                    <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; display: block;">Current Password</span>
+                    <strong style="font-size: 16px; color: var(--text-primary); letter-spacing: 2px;">••••••••</strong>
+                </div>
+                <a href="{{ url_for('auth.forgot_password') }}" class="btn btn-primary btn-sm">
+                    <span>🔑</span> Change Password
+                </a>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-secondary); margin: 0; line-height: 1.5;">
+                Your password is protected using secure access controls. Request a password reset link to update your credentials.
+            </p>
+        </div>
+    </section>
+
+    <!-- Account Information Card -->
+    <section class="card">
+        <div class="card-header">
+            <div>
+                <span class="badge badge-info" style="margin-bottom: 4px;">ACCOUNT INFORMATION</span>
+                <h3 class="card-title">Account History</h3>
+            </div>
+        </div>
+        <div class="card-body" style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                <span style="font-size: 13px; color: var(--text-secondary);">Member Since</span>
+                <strong style="font-size: 13.5px; color: var(--text-primary);">{{ created_at if created_at else 'Active Account' }}</strong>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                <span style="font-size: 13px; color: var(--text-secondary);">Last Activity</span>
+                <strong style="font-size: 13.5px; color: var(--text-primary);">Active Session</strong>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

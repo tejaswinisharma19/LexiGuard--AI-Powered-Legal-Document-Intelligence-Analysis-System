@@ -1,0 +1,162 @@
+{% extends "layout.html" %}
+
+{% block title %}LexiGuard | Application Settings{% endblock %}
+
+{% block header_eyebrow %}WORKSPACE PREFERENCES{% endblock %}
+{% block header_title %}Settings{% endblock %}
+
+{% block content %}
+<!-- Settings Header Summary Card -->
+<div class="card" style="margin-bottom: 24px;">
+    <div class="card-body" style="padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+        <div>
+            <span class="badge badge-info" style="margin-bottom: 8px;">SETTINGS</span>
+            <h2 style="font-size: 20px; font-weight: 750; color: var(--text-primary); margin-bottom: 6px;">
+                Application Settings
+            </h2>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin: 0; max-width: 640px; line-height: 1.6;">
+                Manage your LexiGuard workspace preferences and account security controls.
+            </p>
+        </div>
+        <div style="font-size: 44px; opacity: 0.2; color: var(--primary);">
+            ⚙
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px;">
+
+    <!-- Account Preferences Card -->
+    <section class="card">
+        <div class="card-header">
+            <div>
+                <span class="badge badge-info" style="margin-bottom: 4px;">PREFERENCES</span>
+                <h3 class="card-title">Account Preferences</h3>
+            </div>
+        </div>
+        <div class="card-body" style="display: flex; flex-direction: column; gap: 16px;">
+            <div>
+                <label class="form-label" style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Language</label>
+                <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary); background: var(--bg-subtle); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                    <span>English (US)</span>
+                    <span class="badge badge-secondary" style="font-size: 10px;">Default</span>
+                </div>
+            </div>
+
+            <div>
+                <label class="form-label" style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Theme Mode</label>
+                <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary); background: var(--bg-subtle); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                    <span>Light / Dark Theme</span>
+                    <button type="button" onclick="if(window.toggleTheme){window.toggleTheme();}else{var b=document.getElementById('themeToggleBtn');if(b)b.click();}" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 4px 10px;">
+                        Toggle Theme
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <label class="form-label" style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Workspace View</label>
+                <div style="font-size: 13.5px; font-weight: 600; color: var(--text-primary); background: var(--bg-subtle); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                    <span>Legal Intelligence Workspace</span>
+                    <span class="badge badge-info" style="font-size: 10px;">Active</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security & Sessions Card -->
+    <section class="card">
+        <div class="card-header">
+            <div>
+                <span class="badge badge-warning" style="margin-bottom: 4px;">SECURITY</span>
+                <h3 class="card-title">Security & Session Controls</h3>
+            </div>
+        </div>
+        <div class="card-body" style="display: flex; flex-direction: column; gap: 16px;">
+            <div>
+                <label class="form-label" style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Password Security</label>
+                <div style="padding: 12px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                    <span style="font-size: 13px; color: var(--text-secondary);">Your password is securely protected.</span>
+                    <a href="{{ url_for('auth.forgot_password') }}" class="btn btn-primary btn-sm" style="font-size: 11.5px;">
+                        🔑 Change Password
+                    </a>
+                </div>
+            </div>
+
+            <div>
+                <label class="form-label" style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Account Sessions</label>
+                <div style="padding: 12px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                    <span style="font-size: 13px; color: var(--text-secondary);">Manage your active login session.</span>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary btn-sm" style="font-size: 11.5px;">
+                        🚪 Sign Out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Notifications & Privacy Security Row -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 24px;">
+
+    <!-- Notifications Card -->
+    <section class="card">
+        <div class="card-header">
+            <div>
+                <span class="badge badge-info" style="margin-bottom: 4px;">NOTIFICATIONS</span>
+                <h3 class="card-title">Notification Preferences</h3>
+            </div>
+        </div>
+        <div class="card-body">
+            <div style="padding: 14px 16px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <div>
+                    <strong style="display: block; font-size: 13.5px; color: var(--text-primary);">Email Notifications</strong>
+                    <small style="color: var(--text-muted); font-size: 12px;">Receive important account and workspace notifications.</small>
+                </div>
+                <span class="badge badge-success" style="font-size: 10.5px;">Enabled</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Privacy & Security Card -->
+    <section class="card">
+        <div class="card-header">
+            <div>
+                <span class="badge badge-info" style="margin-bottom: 4px;">PRIVACY & SECURITY</span>
+                <h3 class="card-title">Security Protections</h3>
+            </div>
+        </div>
+        <div class="card-body" style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="padding: 10px 12px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 13px; color: var(--text-secondary);">Secure account authentication</span>
+                <span class="badge badge-success" style="font-size: 10px;">Active</span>
+            </div>
+            <div style="padding: 10px 12px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 13px; color: var(--text-secondary);">Protected document access</span>
+                <span class="badge badge-success" style="font-size: 10px;">Enforced</span>
+            </div>
+            <div style="padding: 10px 12px; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 13px; color: var(--text-secondary);">Secure session management</span>
+                <span class="badge badge-success" style="font-size: 10px;">Verified</span>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- About LexiGuard Card -->
+<section class="card">
+    <div class="card-header">
+        <div>
+            <span class="badge badge-info" style="margin-bottom: 4px;">ABOUT</span>
+            <h3 class="card-title">About LexiGuard</h3>
+        </div>
+    </div>
+    <div class="card-body" style="display: flex; flex-direction: column; gap: 12px;">
+        <p style="font-size: 13.5px; color: var(--text-primary); margin: 0; line-height: 1.6;">
+            LexiGuard provides AI-assisted legal document analysis, contract intelligence, and research tools designed for legal professionals.
+        </p>
+        <p style="font-size: 12.5px; color: var(--text-secondary); margin: 0; line-height: 1.5; font-style: italic;">
+            Disclaimer: AI-generated information is provided for research and review purposes only and does not replace professional legal advice.
+        </p>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,3 @@
+"""
+LexiGuard Knowledge Base Package
+"""

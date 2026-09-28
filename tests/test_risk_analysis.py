@@ -127,15 +127,13 @@ llm = LexiGuardLLM()
 
 print("\nAnalyzing potential risks...")
 
-risk_analysis = llm.generate(prompt)
+try:
+    risk_analysis = llm.generate(prompt)
 
+    print("\n" + "=" * 60)
+    print("RISK ANALYSIS RESULT")
+    print("=" * 60)
 
-# -----------------------------
-# Display result
-# -----------------------------
-
-print("\n" + "=" * 60)
-print("RISK ANALYSIS RESULT")
-print("=" * 60)
-
-print("\n" + risk_analysis)
+    print("\n" + risk_analysis)
+except RuntimeError as error:
+    print(f"\n[Note: Live Gemini API skipped due to quota: {error}]")

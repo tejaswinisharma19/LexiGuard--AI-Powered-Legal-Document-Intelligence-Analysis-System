@@ -1,23 +1,23 @@
 import os
-
-from aws.s3_service import S3Service
-
-
-S3_OBJECT_KEY = "documents/legal_agreement.pdf"
-DOWNLOAD_PATH = "test_documents/downloaded_legal_agreement.pdf"
+import pytest
+from services.local_storage_service import LocalStorageService
 
 
-s3_service = S3Service()
+def test_storage_download_standalone():
+    storage = LocalStorageService(upload_folder="uploads")
+    test_src = "test_download_src.txt"
+    with open(test_src, "w", encoding="utf-8") as f:
+        f.write("Local storage download test content")
 
-result = s3_service.download_file(
-    S3_OBJECT_KEY,
-    DOWNLOAD_PATH
-)
-
-print("Download successful!")
-print(f"Downloaded file: {result}")
-print(f"File exists locally: {os.path.exists(DOWNLOAD_PATH)}")
-
-if os.path.exists(DOWNLOAD_PATH):
-    file_size = os.path.getsize(DOWNLOAD_PATH)
-    print(f"Downloaded file size: {file_size} bytes")
+    storage.upload_file(test_src, "documents/test_dl.txt")
+    dest = "test_download_dest.txt"
+    try:
+        res = storage.download_file("documents/test_dl.txt", dest)
+        assert res == dest
+        assert os.path.exists(dest)
+    finally:
+        storage.delete_file("documents/test_dl.txt")
+        if os.path.exists(test_src):
+            os.remove(test_src)
+        if os.path.exists(dest):
+            os.remove(dest)

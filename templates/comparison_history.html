@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block title %}LexiGuard | Comparison History{% endblock %}
+
+{% block header_eyebrow %}COMPARISON AUDIT LOGS{% endblock %}
+{% block header_title %}Comparison History{% endblock %}
+
+{% block header_actions %}
+<a href="/compare" class="btn btn-primary btn-sm">
+    <span>⇄</span> New Comparison
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Document Filter Selector Card -->
+<section class="card filter-card" style="margin-bottom: 24px;">
+    <div style="display: flex; align-items: center; gap: 12px; flex: 1; flex-wrap: wrap;">
+        <label for="comparisonDocSelect" class="form-label" style="margin: 0; white-space: nowrap; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; color: var(--text-muted);">
+            Filter by Document:
+        </label>
+        <select id="comparisonDocSelect" class="form-select" style="flex: 1; min-width: 220px; font-weight: 600;">
+            <option value="">All Documents</option>
+        </select>
+    </div>
+    <button class="btn btn-secondary btn-sm" id="refreshComparisonHistory" type="button">
+        <span>↻</span> Refresh
+    </button>
+</section>
+
+<!-- Comparison History Container Section -->
+<section class="card" id="comparisonHistory" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <div>
+            <span class="badge badge-info" style="margin-bottom: 4px;">HISTORIC COMPARISON MATRICES</span>
+            <h3 class="card-title" style="color: var(--text-main);">Side-by-Side Document Comparisons</h3>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="comparisonHistoryContainer">
+            <div class="empty-state">
+                <div class="empty-icon">⇄</div>
+                <h4 style="font-size: 15px; font-weight: 700; color: var(--text-main);">Loading comparison history...</h4>
+                <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px;">Fetching previous contract comparison records.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Legal Disclaimer Bar -->
+<div class="disclaimer-bar">
+    <span style="font-size: 15px; color: var(--accent-blue);">ℹ</span>
+    <div style="color: var(--text-secondary);">
+        <strong style="color: var(--text-main);">Legal Disclaimer:</strong> LexiGuard provides AI-assisted document comparison for informational purposes only. It is not a substitute for professional legal advice.
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
