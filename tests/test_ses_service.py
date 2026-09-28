@@ -19,6 +19,11 @@ class TestSESService(unittest.TestCase):
             "full_name": "SES Test User"
         })
 
+    def tearDown(self):
+        with dynamodb_service._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM users WHERE email = %s;", (self.test_email,))
+
     def test_ses_service_direct_unit_test(self):
         """Direct unit test for legacy SESService using mocked boto3 client."""
         service = SESService(region_name="us-east-1", sender_email="noreply@lexiguard.com")

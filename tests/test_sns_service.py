@@ -20,6 +20,11 @@ class TestSNSService(unittest.TestCase):
             "full_name": "SNS Test User"
         })
 
+    def tearDown(self):
+        with dynamodb_service._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM users WHERE email = %s;", (self.test_email,))
+
     def test_sns_service_direct_unit_test(self):
         """Direct unit test for SNSService using mocked boto3 client."""
         service = SNSService(region_name="ap-south-1", topic_arn="arn:aws:sns:ap-south-1:123456789012:LexiGuardNotifications")

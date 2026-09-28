@@ -91,9 +91,7 @@ class TestHistoryArchitecture(unittest.TestCase):
 
         for email in [self.user_a_email, self.user_b_email]:
             try:
-                self.dynamodb_service.table.delete_item(
-                    Key={"document_id": f"USER#{email}"}
-                )
+                self.dynamodb_service.delete_user(email)
             except Exception:
                 pass
 

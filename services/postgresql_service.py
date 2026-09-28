@@ -80,6 +80,18 @@ class PostgreSQLService:
             "status": status
         }
 
+    def delete_user(self, email):
+        """
+        Delete a user record by email.
+        """
+        if not email:
+            return False
+        email_clean = str(email).replace("USER#", "").lower().strip()
+        with self._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM users WHERE email = %s;", (email_clean,))
+        return True
+
     def get_user_by_email(self, email):
         """
         Retrieve user account details by email.

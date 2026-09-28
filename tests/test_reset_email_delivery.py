@@ -21,6 +21,11 @@ class TestPasswordResetEmailDelivery(unittest.TestCase):
             "full_name": self.test_name
         })
 
+    def tearDown(self):
+        with dynamodb_service._get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM users WHERE email = %s;", (self.test_email,))
+
     def test_1_forgot_password_get_works(self):
         """1. Forgot-password GET works."""
         res = self.client.get("/forgot-password")
@@ -106,17 +111,22 @@ class TestPasswordResetEmailDelivery(unittest.TestCase):
 
         import uuid
         reg_email = f"new_registered_user_{uuid.uuid4().hex[:8]}@example.com"
-        reg_res = self.client.post("/register", data={
-            "full_name": "New Reg User",
-            "email": reg_email,
-            "password": "Password123!",
-            "confirm_password": "Password123!"
-        })
-        self.assertEqual(reg_res.status_code, 302)
+        try:
+            reg_res = self.client.post("/register", data={
+                "full_name": "New Reg User",
+                "email": reg_email,
+                "password": "Password123!",
+                "confirm_password": "Password123!"
+            })
+            self.assertEqual(reg_res.status_code, 302)
 
-        db_user = dynamodb_service.get_user_by_email(reg_email)
-        self.assertIsNotNone(db_user)
-        self.assertEqual(db_user["full_name"], "New Reg User")
+            db_user = dynamodb_service.get_user_by_email(reg_email)
+            self.assertIsNotNone(db_user)
+            self.assertEqual(db_user["full_name"], "New Reg User")
+        finally:
+            with dynamodb_service._get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("DELETE FROM users WHERE email = %s;", (reg_email,))
 
 if __name__ == "__main__":
     unittest.main()
